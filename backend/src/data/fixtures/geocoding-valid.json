@@ -1,0 +1,6 @@
+{
+  "results": [
+    { "name": "São Paulo", "latitude": -23.55, "longitude": -46.63, "admin1": "São Paulo", "country": "Brasil" },
+    { "name": "São Paulo", "latitude": 40.7, "longitude": -74, "admin1": "New York", "country": "Estados Unidos" }
+  ]
+}

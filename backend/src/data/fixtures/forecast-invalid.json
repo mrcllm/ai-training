@@ -1,0 +1,16 @@
+{
+  "current": {
+    "temperature_2m": 18.4,
+    "apparent_temperature": 17.9,
+    "weather_code": 2,
+    "relative_humidity_2m": 101,
+    "wind_speed_10m": 14.2
+  },
+  "current_units": {
+    "temperature_2m": "°C",
+    "apparent_temperature": "°C",
+    "weather_code": "wmo code",
+    "relative_humidity_2m": "%",
+    "wind_speed_10m": "km/h"
+  }
+}

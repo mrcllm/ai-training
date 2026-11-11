@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T00:00:00.000Z",
+  "title": "Design System: Clima agora",
+  "extensions": {
+    "colorMeta": {
+      "deep-teal": { "role": "primary", "displayName": "Azul-petróleo profundo", "canonical": "#163f4b", "tonalRamp": ["#0f303a", "#163f4b", "#1b6172", "#2c7180", "#edf3f4", "#ffffff"] },
+      "teal": { "role": "secondary", "displayName": "Azul-petróleo", "canonical": "#1b6172", "tonalRamp": ["#0f303a", "#163f4b", "#1b6172", "#2c7180", "#edf3f4"] },
+      "teal-hover": { "role": "primary", "displayName": "Azul-petróleo hover", "canonical": "#0f303a", "tonalRamp": ["#0f303a", "#163f4b", "#1b6172", "#2c7180"] },
+      "page-mist": { "role": "neutral", "displayName": "Névoa", "canonical": "#edf3f4", "tonalRamp": ["#0f2930", "#475569", "#cbd5e1", "#edf3f4", "#ffffff"] },
+      "pale-teal": { "role": "neutral", "displayName": "Teal pálido", "canonical": "#f3f7f7", "tonalRamp": ["#0f2930", "#475569", "#cbd5e1", "#f3f7f7", "#ffffff"] },
+      "sun-yellow": { "role": "tertiary", "displayName": "Amarelo-sol", "canonical": "#f4c95d", "tonalRamp": ["#694d00", "#a47b16", "#f4c95d", "#fff5d8"] },
+      "pale-yellow": { "role": "neutral", "displayName": "Amarelo-pálido", "canonical": "#fff5d8", "tonalRamp": ["#694d00", "#a47b16", "#f4c95d", "#fff5d8"] },
+      "ink": { "role": "neutral", "displayName": "Tinta", "canonical": "#0f2930", "tonalRamp": ["#0f2930", "#163f4b", "#475569", "#cbd5e1", "#ffffff"] },
+      "slate-text": { "role": "neutral", "displayName": "Ardósia", "canonical": "#475569", "tonalRamp": ["#0f2930", "#475569", "#94a3b8", "#cbd5e1", "#ffffff"] },
+      "slate-border": { "role": "neutral", "displayName": "Borda ardósia", "canonical": "#cbd5e1", "tonalRamp": ["#475569", "#94a3b8", "#cbd5e1", "#edf3f4", "#ffffff"] },
+      "paper": { "role": "neutral", "displayName": "Papel", "canonical": "#ffffff", "tonalRamp": ["#cbd5e1", "#edf3f4", "#f3f7f7", "#ffffff"] },
+      "error-red": { "role": "tertiary", "displayName": "Vermelho de erro", "canonical": "#991b1b", "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#fecaca"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Mensagem principal do painel de contexto." },
+      "headline": { "displayName": "Headline", "purpose": "Título da consulta e localidade resolvida." },
+      "body": { "displayName": "Body", "purpose": "Instruções, campos e dados." },
+      "label": { "displayName": "Label", "purpose": "Rótulos persistentes e ações." }
+    },
+    "shadows": [
+      { "name": "weather-card", "value": "0 18px 45px rgba(22,63,75,0.1)", "purpose": "Separar cartões brancos da área de consulta." }
+    ],
+    "motion": [
+      { "name": "button-color", "value": "color transition, 200ms", "purpose": "Mudança de cor do botão ao passar o ponteiro." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Ação primária",
+      "kind": "button",
+      "description": "Envia o nome da cidade para consultar as condições atuais.",
+      "html": "<button class=\"ds-button-primary\" type=\"button\">Consultar clima</button>",
+      "css": ".ds-button-primary { height: 48px; padding: 0 24px; border: 0; border-radius: 12px; background: #163f4b; color: #ffffff; font-family: 'Readex Pro', sans-serif; font-size: 14px; font-weight: 600; transition: background-color 200ms; } .ds-button-primary:hover { background: #0f303a; } .ds-button-primary:focus-visible { outline: 4px solid #f4c95d; outline-offset: 2px; }"
+    },
+    {
+      "name": "Campo de cidade",
+      "kind": "input",
+      "description": "Recebe uma localidade com rótulo persistente e foco visível.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-city\">Cidade</label><input class=\"ds-input-city\" id=\"ds-city\" placeholder=\"Ex.: São Paulo\" />",
+      "css": ".ds-field-label { display: block; margin-bottom: 8px; color: #1e293b; font-family: 'Readex Pro', sans-serif; font-size: 14px; font-weight: 600; } .ds-input-city { width: 100%; height: 48px; padding: 0 16px; border: 1px solid #cbd5e1; border-radius: 12px; background: #ffffff; color: #0f2930; font-family: 'Readex Pro', sans-serif; font-size: 16px; } .ds-input-city:focus-visible { outline: 2px solid #1b6172; outline-offset: 2px; } .ds-input-city:disabled { background: #f1f5f9; }"
+    },
+    {
+      "name": "Cartão de condição atual",
+      "kind": "custom",
+      "description": "Mostra localidade, temperatura, condição, sensação, umidade, vento e fonte.",
+      "html": "<section class=\"ds-weather-result\"><h2>São Paulo, São Paulo, Brasil</h2><p>Parcialmente nublado</p><dl><dt>Umidade relativa</dt><dd>62%</dd></dl></section>",
+      "css": ".ds-weather-result { padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff; box-shadow: 0 18px 45px rgba(22,63,75,0.1); } .ds-weather-result h2 { color: #0f2930; } .ds-weather-result dl > div { border-radius: 12px; background: #f3f7f7; padding: 16px; }"
+    },
+    {
+      "name": "Mensagem de estado",
+      "kind": "custom",
+      "description": "Texto de consulta ou erro apresentado abaixo do formulário.",
+      "html": "<p class=\"ds-feedback\" role=\"status\">Consultando as condições atuais…</p>",
+      "css": ".ds-feedback { color: #1b6172; font-family: 'Readex Pro', sans-serif; font-size: 14px; font-weight: 500; } .ds-feedback-error { color: #991b1b; }"
+    },
+    {
+      "name": "Atribuição de fonte",
+      "kind": "custom",
+      "description": "Crédito da fonte meteorológica ao final da leitura.",
+      "html": "<p class=\"ds-attribution\">Dados por <a class=\"ds-source-link\" href=\"https://open-meteo.com/\">Open-Meteo</a></p>",
+      "css": ".ds-attribution { color: #475569; font-family: 'Readex Pro', sans-serif; font-size: 14px; } .ds-source-link { color: #14596a; font-weight: 600; text-decoration: underline; text-decoration-color: #f4c95d; text-decoration-thickness: 2px; text-underline-offset: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Clima sem rodeios",
+    "overview": "Um painel azul-petróleo apresenta o serviço e acompanha uma área clara para busca e leitura rápida das condições. Amarelo suave é reservado a ícones e destaques meteorológicos. Em telas largas, contexto e consulta ficam lado a lado; em telas estreitas, empilham verticalmente.",
+    "keyCharacteristics": [
+      "Painel azul-petróleo e área de consulta em cinza azulado claro.",
+      "Amarelo suave reservado para ícones e pequenos destaques.",
+      "Cartões brancos com bordas suaves e sombras difusas.",
+      "Readex Pro, medidas com numerais tabulares e estados textuais."
+    ],
+    "rules": [
+      { "name": "The Accent Rule", "body": "Azul-petróleo é a identidade principal; amarelo aparece apenas em acentos e destaques meteorológicos.", "section": "colors" },
+      { "name": "The Responsive Search Rule", "body": "A partir de 640px, input e ação ficam lado a lado com a ação alinhada à base do input; em telas menores, empilham.", "section": "layout" }
+    ],
+    "dos": [
+      "Do manter o painel de contexto azul-petróleo e amarelo apenas como acento.",
+      "Do alinhar a ação à base do input em telas largas.",
+      "Do identificar a localidade resolvida e todas as medidas do PRD.",
+      "Do manter foco visível e mensagens textuais para estados."
+    ],
+    "donts": [
+      "Don't trocar a identidade azul-petróleo por uma superfície predominantemente amarela.",
+      "Don't alinhar o botão pelo topo do formulário quando o rótulo fica acima do input.",
+      "Don't remover localidade, condições, unidades ou atribuição da fonte."
+    ]
+  }
+}
