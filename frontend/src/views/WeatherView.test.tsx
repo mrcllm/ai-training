@@ -22,11 +22,11 @@ describe('WeatherView', () => {
   });
 
   it('presents errors returned from the weather service', async () => {
-    mockedFetchWeather.mockRejectedValue({ kind: 'not-found', message: 'Cidade não encontrada.' });
+    mockedFetchWeather.mockRejectedValue({ kind: 'not-found' });
     render(<WeatherView />);
     fireEvent.change(screen.getByRole('textbox', { name: 'Cidade' }), { target: { value: 'Atlantis' } });
     fireEvent.click(screen.getByRole('button', { name: 'Consultar clima' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Cidade não encontrada.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Cidade não encontrada. Revise o nome e tente novamente.');
   });
 });

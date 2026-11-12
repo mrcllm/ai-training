@@ -3,16 +3,13 @@ import { fetchWeather } from '../services/weather-service';
 import type { UiWeatherError } from '../types/api-error';
 import type { WeatherSearchState } from '../types/weather-search-state';
 
-const DEFAULT_ERROR: UiWeatherError = {
-  kind: 'unavailable',
-  message: 'Não foi possível consultar o clima agora. Tente novamente em instantes.',
-};
+const DEFAULT_ERROR: UiWeatherError = { kind: 'unavailable' };
+const WEATHER_ERROR_KINDS = { validation: true, 'not-found': true, unavailable: true } as const satisfies Record<UiWeatherError['kind'], true>;
 
-export function useWeatherSearch() {
+export function useWeatherSearch(): { state: WeatherSearchState; search: (city: string) => Promise<void> } {
   const [state, setState] = useState<WeatherSearchState>({ status: 'idle' });
   const activeRequest = useRef<AbortController | null>(null);
   const isMounted = useRef(true);
-
   useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -20,7 +17,6 @@ export function useWeatherSearch() {
       activeRequest.current?.abort();
     };
   }, []);
-
   const search = useCallback(async (city: string): Promise<void> => {
     if (activeRequest.current) return;
     const controller = new AbortController();
@@ -36,11 +32,11 @@ export function useWeatherSearch() {
       if (activeRequest.current === controller) activeRequest.current = null;
     }
   }, []);
-
   return { state, search };
 }
 
 function isWeatherError(value: unknown): value is UiWeatherError {
-  return typeof value === 'object' && value !== null && 'kind' in value && 'message' in value
-    && typeof value.kind === 'string' && typeof value.message === 'string';
+  if (typeof value !== 'object' || value === null || !('kind' in value)) return false;
+  const { kind } = value;
+  return typeof kind === 'string' && Object.hasOwn(WEATHER_ERROR_KINDS, kind);
 }

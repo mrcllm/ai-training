@@ -6,5 +6,4 @@ export type ApiErrorCode =
 
 export type UiWeatherError = {
   kind: 'validation' | 'not-found' | 'unavailable';
-  message: string;
 };
