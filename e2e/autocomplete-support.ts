@@ -3,6 +3,7 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export const BOM_JESUS_RS = 'Bom Jesus, Rio Grande do Sul, Brasil';
 export const BOM_JESUS_PI = 'Bom Jesus, Piauí, Brasil';
 export const RECIFE = 'Recife, Pernambuco, Brasil';
+export const PARIS = 'Paris, Île-de-France, França';
 
 export function cityInput(page: Page): Locator {
   return page.getByRole('combobox', { name: 'Cidade' });

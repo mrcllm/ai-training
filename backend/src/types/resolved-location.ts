@@ -5,5 +5,4 @@ export type ResolvedLocation = Coordinates & {
   name: string;
   admin1: string | null;
   country: string | null;
-  countryCode: string;
 };

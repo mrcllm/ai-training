@@ -28,8 +28,8 @@ function locationNotFound(): AppError {
   });
 }
 
-function requireBrazilianLocation(location: ResolvedLocation | null): ResolvedLocation {
-  if (location === null || location.countryCode !== 'BR') throw locationNotFound();
+function requireLocation(location: ResolvedLocation | null): ResolvedLocation {
+  if (location === null) throw locationNotFound();
   return location;
 }
 
@@ -46,7 +46,7 @@ export async function getCurrentWeather(locationId: number, dependencies: GetCur
   let stage: ProviderStage = 'location_lookup';
   let startedAt = now();
   try {
-    const location = requireBrazilianLocation(await dependencies.provider.getLocation(locationId, scope.signal));
+    const location = requireLocation(await dependencies.provider.getLocation(locationId, scope.signal));
     logProviderStep({ status: 'success', stage, startedAt, now, requestId: dependencies.requestId });
     stage = 'forecast';
     startedAt = now();

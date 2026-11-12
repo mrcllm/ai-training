@@ -30,7 +30,7 @@ Foram lidos `AGENTS.md` e todas as rules em `.agents/rules/`: `code-standards.md
 <requirements>
 
 - RF1: aceitar buscas de sugestões somente a partir de dois caracteres úteis.
-- RF3–RF7: limitar a oito resultados, restringir ao Brasil, preservar a normalização da origem e impedir resultados incompatíveis com a consulta atual.
+- RF3–RF7: limitar a oito resultados, aceitar localidades de qualquer país, preservar a normalização da origem e impedir resultados incompatíveis com a consulta atual.
 - RF8 e RF10: fornecer cidade, estado quando disponível e uma identidade inequívoca para cada sugestão.
 - RF13: aceitar consulta meteorológica somente por uma localidade selecionada válida.
 - RF16–RF18: diferenciar lista vazia, indisponibilidade e entrada abaixo do limite.
@@ -45,10 +45,10 @@ Foram lidos `AGENTS.md` e todas as rules em `.agents/rules/`: `code-standards.md
 
 - [x] 1.1 Criar os tipos de localidade, atualizar `ResolvedLocation`, `WeatherProvider` e os códigos públicos de erro.
 - [x] 1.2 Implementar e testar a normalização de query e de `locationId`, incluindo limites Unicode e `Int32`.
-- [x] 1.3 Separar e testar os parsers de busca e lookup, com fixtures válidas, vazias, parciais, estrangeiras e inválidas.
+- [x] 1.3 Separar e testar os parsers de busca e lookup, com fixtures válidas, vazias, parciais, de outros países e inválidas.
 - [x] 1.4 Estender `open-meteo-client` para Search, Get e Forecast com parâmetros fixos, cancelamento e respostas not-found.
 - [x] 1.5 Atualizar configuração e `.env.example` com a URL de lookup e o timeout dedicado das sugestões.
-- [x] 1.6 Implementar `search-locations` e migrar `get-current-weather` para resolver exatamente o ID brasileiro selecionado.
+- [x] 1.6 Implementar `search-locations` e migrar `get-current-weather` para resolver exatamente o ID selecionado, de qualquer país.
 - [x] 1.7 Criar `GET /locations`, migrar `GET /weather`, registrar as rotas em `app.ts` e adicionar logs/cancelamento HTTP.
 - [x] 1.8 Implementar os testes unitários TU-01 a TU-07 e os testes de integração TI-01 a TI-06.
 - [x] 1.9 Executar build, testes e cobertura do backend, corrigindo regressões até atingir os limiares definidos.
@@ -77,7 +77,7 @@ Usar a [Abordagem de testes](./techspec.md#abordagem-de-testes) como fonte de ve
 
 - [x] TU-01 — Normaliza query Unicode e aplica limites
 - [x] TU-02 — Valida o identificador selecionado
-- [x] TU-03 — Interpreta até oito sugestões brasileiras
+- [x] TU-03 — Interpreta até oito sugestões
 - [x] TU-04 — Rejeita payloads de geocodificação inválidos
 - [x] TU-05 — Monta URLs corretas da Open-Meteo
 - [x] TU-06 — Busca sugestões com deadline e sem retry
@@ -89,7 +89,7 @@ Usar a [Abordagem de testes](./techspec.md#abordagem-de-testes) como fonte de ve
 - [x] TI-02 — Rejeita query inválida sem consultar a origem
 - [x] TI-03 — Isola falha externa da busca
 - [x] TI-04 — Consulta exatamente a localidade selecionada
-- [x] TI-05 — Diferencia ID inválido, ausente e não brasileiro
+- [x] TI-05 — Diferencia ID inválido, ausente e estrangeiro válido
 - [x] TI-06 — Preserva middleware e cancelamento HTTP
 
 ### Testes E2E

@@ -5,7 +5,7 @@ const CURRENT_FIELDS = 'temperature_2m,apparent_temperature,relative_humidity_2m
 export function locationSearchUrl(baseUrl: string, query: string): URL {
   const url = new URL(baseUrl);
   url.search = new URLSearchParams({
-    name: query, count: '8', language: 'pt', countryCode: 'BR', format: 'json',
+    name: query, count: '8', language: 'pt', format: 'json',
   }).toString();
   return url;
 }

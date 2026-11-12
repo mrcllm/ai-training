@@ -2,7 +2,7 @@
 
 ## Resumo
 
-Esta especificação detalha a implementação do [PRD de autocomplete de localidade](./prd.md) sobre o painel de clima existente. O backend continuará como única fronteira com a Open-Meteo e passará a expor duas leituras idempotentes: `GET /locations?query=` para até oito sugestões brasileiras e `GET /weather?locationId=` para resolver a opção selecionada e obter as condições atuais. O identificador numérico da Open-Meteo será a identidade estável compartilhada entre os dois contratos; nomes ou coordenadas enviados pelo navegador não serão usados como autoridade.
+Esta especificação detalha a implementação do [PRD de autocomplete de localidade](./prd.md) sobre o painel de clima existente. O backend continuará como única fronteira com a Open-Meteo e passará a expor duas leituras idempotentes: `GET /locations?query=` para até oito sugestões de qualquer país e `GET /weather?locationId=` para resolver a opção selecionada e obter as condições atuais. O identificador numérico da Open-Meteo será a identidade estável compartilhada entre os dois contratos; nomes ou coordenadas enviados pelo navegador não serão usados como autoridade.
 
 No frontend, um combobox React próprio seguirá o padrão WAI-ARIA de autocomplete por lista com seleção manual. Um hook isolará debounce de 300 ms, cancelamento e proteção contra respostas obsoletas; outro isolará a navegação por teclado. A solução reutilizará `fetch`, `AbortController`, Vitest, Testing Library, MSW e Playwright já presentes, sem biblioteca nova de produção, persistência, cache ou retry. A busca de sugestões terá deadline de 600 ms no backend; a consulta meteorológica preservará o orçamento total existente de 2,5 segundos.
 
@@ -45,7 +45,7 @@ Componentes novos:
 - `backend/src/services/search-locations.ts` — orquestra busca, deadline de 600 ms, cancelamento, mapeamento para o contrato público e ausência de retry.
 - `backend/src/services/normalize-location-query.ts` — normaliza NFC e espaços, valida de 2 a 100 caracteres e rejeita queries não escalares.
 - `backend/src/services/normalize-location-id.ts` — aceita um único inteiro decimal positivo dentro do intervalo `Int32` da origem.
-- `backend/src/data/parse-location-search-response.ts` — refina a resposta `unknown` de `/v1/search`, preserva a ordem e limita a oito localidades brasileiras.
+- `backend/src/data/parse-location-search-response.ts` — refina a resposta `unknown` de `/v1/search`, preserva a ordem e limita a oito localidades, sem filtro de país.
 - `backend/src/data/parse-location-response.ts` — refina o objeto `unknown` de `/v1/get` e diferencia localidade ausente de payload inválido.
 - `backend/src/types/location-suggestion.ts` — contrato público de cada sugestão.
 - `backend/src/types/location-suggestions-response.ts` — envelope de sugestões e atribuição.
@@ -63,9 +63,9 @@ Componentes novos:
 Componentes modificados:
 
 - `backend/src/types/weather-provider.ts` — substitui `findLocations` por `searchLocations` e acrescenta `getLocation`; `getCurrentConditions` permanece.
-- `backend/src/types/resolved-location.ts` — acrescenta `id` e `countryCode` ao modelo interno.
+- `backend/src/types/resolved-location.ts` — acrescenta `id` ao modelo interno.
 - `backend/src/data/open-meteo-client.ts` — cria URLs separadas para busca, consulta por ID e previsão; mantém validação HTTP/JSON e cancelamento.
-- `backend/src/services/get-current-weather.ts` — recebe `locationId`, resolve a localidade exata, confirma `countryCode=BR` e consulta suas coordenadas.
+- `backend/src/services/get-current-weather.ts` — recebe `locationId`, resolve a localidade exata, de qualquer país, e consulta suas coordenadas.
 - `backend/src/routes/weather-route.ts` — troca a query `city` por `locationId` e preserva request ID, `no-store` e observabilidade.
 - `backend/src/app.ts` — registra a nova rota e compõe os dois serviços com o mesmo provedor injetável.
 - `backend/src/config/environment.ts` e `backend/.env.example` — acrescentam URL de consulta por ID e timeout das sugestões.
@@ -126,7 +126,7 @@ O foco DOM permanecerá no `input`. A opção ativa será comunicada por `aria-a
 
 ### Modelos de dados
 
-#### `LocationSuggestion` — localidade brasileira pronta para seleção
+#### `LocationSuggestion` — localidade pronta para seleção
 
 | Campo | Tipo | Obrigatório | Descrição |
 | --- | --- | --- | --- |
@@ -144,7 +144,7 @@ O foco DOM permanecerá no `input`. A opção ativa será comunicada por `aria-a
 }
 ~~~
 
-> **Localidade parcial:** campos opcionais omitidos pela origem serão normalizados para `null`. O `id`, o nome, as coordenadas e `country_code` válidos continuam obrigatórios no modelo interno.
+> **Localidade parcial:** campos opcionais omitidos pela origem serão normalizados para `null`. O `id`, o nome e as coordenadas válidos continuam obrigatórios no modelo interno; `country_code` não é exigido nem usado como filtro.
 
 ~~~text
 {
@@ -199,7 +199,6 @@ O foco DOM permanecerá no `input`. A opção ativa será comunicada por `aria-a
 | `name` | `string` | sim | Nome normalizado em NFC. |
 | `admin1` | `string \| null` | sim | Primeira divisão administrativa normalizada. |
 | `country` | `string \| null` | sim | País normalizado. |
-| `countryCode` | `string` | sim | Código ISO de duas letras; deve ser `BR` no fluxo público. |
 | `latitude` | `number` | sim | Coordenada finita entre -90 e 90. |
 | `longitude` | `number` | sim | Coordenada finita entre -180 e 180. |
 
@@ -209,7 +208,6 @@ O foco DOM permanecerá no `input`. A opção ativa será comunicada por `aria-a
   "name": "São Paulo",
   "admin1": "São Paulo",
   "country": "Brasil",
-  "countryCode": "BR",
   "latitude": -23.5475,
   "longitude": -46.63611
 }
@@ -292,7 +290,7 @@ O estado volta a `idle` imediatamente quando a entrada tem menos de dois caracte
 | --- | --- | --- |
 | `INVALID_LOCATION_QUERY` | `400` | Query ausente, repetida, não textual, curta ou acima de 100 caracteres. |
 | `INVALID_LOCATION_ID` | `400` | ID ausente, repetido, não decimal, não positivo ou fora de `Int32`. |
-| `LOCATION_NOT_FOUND` | `404` | ID não existe mais ou resolve uma localidade fora do Brasil. |
+| `LOCATION_NOT_FOUND` | `404` | ID não existe mais na origem. |
 | `LOCATION_PROVIDER_UNAVAILABLE` | `503` | Timeout, rede, HTTP ou payload inválido durante a busca de sugestões. |
 | `WEATHER_PROVIDER_UNAVAILABLE` | `503` | Falha no lookup selecionado ou na previsão, exceto ausência reconhecida. |
 | `INVALID_REQUEST` | `400` | JSON inválido em rotas que aceitem corpo; preservado no middleware global. |
@@ -317,18 +315,17 @@ O payload nunca conterá URL externa, stack, query digitada, coordenadas ou mens
 | `results[].name` | `LocationSuggestion.name` e `ResolvedLocation.name` |
 | `results[].admin1` ausente ou vazio | `admin1 = null` |
 | `results[].country` ausente ou vazio | `country = null` |
-| `results[].country_code` | filtro `BR` e `ResolvedLocation.countryCode` |
 | `results[].latitude`, `longitude` | uso interno em `ResolvedLocation` |
 | objeto `/v1/get` | `ResolvedLocation` usado pela consulta meteorológica |
 | `current.*` e `current_units.*` | `WeatherResponse.current` e `WeatherResponse.units`, conforme contrato existente |
 
-`/v1/search` será truncado em oito entradas antes do mapeamento. Entradas não brasileiras serão removidas como defesa adicional sem reordenar as restantes. Um item brasileiro estruturalmente inválido tornará o payload inválido e gerará `503`, evitando oferecer uma seleção sem identidade confiável.
+`/v1/search` será truncado em oito entradas antes do mapeamento. Nenhuma entrada é removida por país e a ordem da origem é preservada. Um item estruturalmente inválido tornará o payload inválido e gerará `503`, evitando oferecer uma seleção sem identidade confiável.
 
 #### Parâmetros fixos na origem
 
 | API | Parâmetros principais |
 | --- | --- |
-| **Geocoding Search** | `name=<query normalizada>`, `count=8`, `language=pt`, `countryCode=BR`, `format=json` |
+| **Geocoding Search** | `name=<query normalizada>`, `count=8`, `language=pt`, `format=json` (sem `countryCode`) |
 | **Geocoding Get** | `id=<locationId>`, `language=pt` |
 | **Weather Forecast** | `latitude`, `longitude`, `current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m`, `temperature_unit=celsius`, `wind_speed_unit=kmh`, `timezone=auto` |
 
@@ -338,7 +335,7 @@ O payload nunca conterá URL externa, stack, query digitada, coordenadas ou mens
 
 | Método | Rota | Descrição |
 | --- | --- | --- |
-| `GET` | `/locations` | Retorna até oito sugestões brasileiras para a query. |
+| `GET` | `/locations` | Retorna até oito sugestões de qualquer país para a query. |
 | `GET` | `/weather` | Retorna o clima da localidade selecionada por ID. |
 
 `GET /health` permanece inalterado e independente da Open-Meteo.
@@ -347,7 +344,7 @@ O payload nunca conterá URL externa, stack, query digitada, coordenadas ou mens
 
 #### `GET /locations`
 
-Busca localidades brasileiras e devolve um contrato pronto para o combobox.
+Busca localidades de qualquer país e devolve um contrato pronto para o combobox.
 
 **Parâmetros de consulta**
 
@@ -447,7 +444,7 @@ GET /locations?query=Recife
 
 #### `GET /weather`
 
-Resolve o ID selecionado na Open-Meteo, confirma que pertence ao Brasil e consulta as condições atuais de suas coordenadas.
+Resolve o ID selecionado na Open-Meteo, e consulta as condições atuais de suas coordenadas.
 
 **Parâmetros de consulta**
 
@@ -459,9 +456,9 @@ Resolve o ID selecionado na Open-Meteo, confirma que pertence ao Brasil e consul
 
 | Status | Corpo | Quando |
 | --- | --- | --- |
-| `200` | `WeatherResponse` | ID brasileiro resolvido e previsão válida. |
+| `200` | `WeatherResponse` | ID resolvido e previsão válida. |
 | `400` | `ApiError(INVALID_LOCATION_ID)` | ID ausente ou inválido. |
-| `404` | `ApiError(LOCATION_NOT_FOUND)` | ID não encontrado ou fora do Brasil. |
+| `404` | `ApiError(LOCATION_NOT_FOUND)` | ID não encontrado. |
 | `503` | `ApiError(WEATHER_PROVIDER_UNAVAILABLE)` | Lookup ou previsão indisponível ou inválido. |
 | `500` | `ApiError(INTERNAL_ERROR)` | Falha interna inesperada. |
 
@@ -527,7 +524,7 @@ GET /weather?locationId=3448439
 ## Pontos de integração
 
 - **Geocoding Search:** `https://geocoding-api.open-meteo.com/v1/search`. A [documentação oficial](https://open-meteo.com/en/docs/geocoding-api) define `count`, `language`, `countryCode`, busca exata com dois caracteres, prefixo normalizado a partir de três e IDs resolvíveis por `/v1/get`.
-- **Geocoding Get:** `https://geocoding-api.open-meteo.com/v1/get`. O backend envia somente o ID selecionado e `language=pt`; o retorno é validado novamente e precisa ter `country_code=BR`.
+- **Geocoding Get:** `https://geocoding-api.open-meteo.com/v1/get`. O backend envia somente o ID selecionado e `language=pt`; o retorno é validado novamente, sem restrição de país.
 - **Weather Forecast:** `https://api.open-meteo.com/v1/forecast`. A integração existente permanece, usando somente variáveis atuais e unidades métricas necessárias.
 - **Autenticação:** o uso não comercial atual não exige chave. Uma futura migração comercial deverá trocar endpoints/credenciais somente por configuração do backend, nunca expor segredo ao frontend.
 - **Atribuição:** o envelope de sugestões e o de clima carregam `SourceAttribution`. A UI mostra o link próximo aos dados conforme a [licença da Open-Meteo](https://open-meteo.com/en/licence).
@@ -546,11 +543,11 @@ Vitest continuará separado em frontend e backend, com cobertura V8 mínima glob
 | --- | --- | --- | --- |
 | TU-01 | Normaliza query Unicode e aplica limites | CA-01, CA-02, CA-10 | NFC e espaços são normalizados; entradas com menos de 2 ou mais de 100 caracteres são recusadas. |
 | TU-02 | Valida o identificador selecionado | CA-04, CA-05 | Aceita um único inteiro `Int32` positivo e rejeita ausente, array, decimal, zero, negativo e excesso. |
-| TU-03 | Interpreta até oito sugestões brasileiras | CA-01, CA-03, CA-08 | Preserva IDs e ordem, normaliza opcionais, limita oito e não entrega país diferente. |
+| TU-03 | Interpreta até oito sugestões | CA-01, CA-03, CA-08 | Preserva IDs e ordem, normaliza opcionais, limita oito e mantém localidades de qualquer país. |
 | TU-04 | Rejeita payloads de geocodificação inválidos | CA-09 | Ausência de ID, nome, país ou coordenada obrigatória gera indisponibilidade estável. |
-| TU-05 | Monta URLs corretas da Open-Meteo | CA-01, CA-02, CA-03, CA-04 | Search envia `count=8`, `language=pt` e `countryCode=BR`; lookup envia o ID; forecast usa as coordenadas resolvidas. |
+| TU-05 | Monta URLs corretas da Open-Meteo | CA-01, CA-02, CA-03, CA-04 | Search envia `count=8` e `language=pt`, sem `countryCode`; lookup envia o ID; forecast usa as coordenadas resolvidas. |
 | TU-06 | Busca sugestões com deadline e sem retry | CA-07, CA-08, CA-09 | Sucesso, vazio, cancelamento, timeout e falha são mapeados uma vez e o timer é limpo. |
-| TU-07 | Consulta o clima pelo ID escolhido | CA-04, CA-05 | Resolve exatamente o ID, recusa localidade ausente/não brasileira e consulta apenas suas coordenadas. |
+| TU-07 | Consulta o clima pelo ID escolhido | CA-04, CA-05 | Resolve exatamente o ID, aceita qualquer país, recusa localidade ausente e consulta apenas suas coordenadas. |
 | TU-08 | Valida o contrato de `location-service` | CA-03, CA-08, CA-09 | Sucesso e vazio são aceitos; envelope inválido ou erro HTTP vira `UiLocationError`. |
 | TU-09 | Aplica debounce e limite mínimo no hook | CA-01, CA-02, CA-10 | Não chama antes de 300 ms nem abaixo de dois caracteres e limpa estado ao reduzir a entrada. |
 | TU-10 | Aborta e ignora respostas obsoletas | CA-06 | Somente a sequência e query ativas podem atualizar o estado. |
@@ -571,7 +568,7 @@ Mocks serão usados somente nas fronteiras: `WeatherProvider`, `fetch`, relógio
 | TI-02 | Rejeita query inválida sem consultar a origem | CA-01, CA-10 | Retorna 400 e `WeatherProvider.searchLocations` não é chamado. |
 | TI-03 | Isola falha externa da busca | CA-07, CA-09 | Timeout, erro ou payload inválido retorna 503 sem detalhes e permite nova requisição independente. |
 | TI-04 | Consulta exatamente a localidade selecionada | CA-04, CA-05 | `GET /weather?locationId=` resolve o ID e usa somente suas coordenadas na previsão. |
-| TI-05 | Diferencia ID inválido, ausente e não brasileiro | CA-05, CA-09 | Retorna, respectivamente, 400 ou 404, sem consultar previsão quando não há localidade válida. |
+| TI-05 | Diferencia ID inválido, ausente e estrangeiro válido | CA-05, CA-09 | Retorna, respectivamente, 400, 404 ou 200, sem consultar previsão quando não há localidade válida. |
 | TI-06 | Preserva middleware e cancelamento HTTP | CA-07, CA-09 | Rotas emitem request ID, CORS, `no-store` e abortam a origem quando o cliente fecha. |
 | TI-07 | Integra view, hooks e services do frontend | CA-04–CA-10, CA-15 | Com MSW, a tela percorre debounce, loading, sucesso, vazio, falha, seleção, submit e preservação do resultado. |
 
@@ -582,6 +579,7 @@ Os testes do backend usarão Supertest com `createApp` e provedor injetado. Os t
 | ID | Nome do caso de teste | Critérios de aceitação | Resultado esperado |
 | --- | --- | --- | --- |
 | E2E-01 | Seleciona por ponteiro uma localidade homônima | CA-03, CA-04 | Mostra cidade/estado, envia o ID escolhido e exibe o clima correspondente, não o primeiro nome coincidente. |
+| E2E-01b | Sugere e consulta uma cidade fora do Brasil | CA-03, CA-04 | A busca por “Paris” mostra cidade, região e país, e a consulta usa o ID escolhido. |
 | E2E-02 | Conclui o fluxo completo por teclado | CA-11, CA-12 | Setas, Enter, Escape e Tab funcionam; foco e anúncios são coerentes e o clima pode ser consultado. |
 | E2E-03 | Comunica carregamento, vazio, falha e recuperação | CA-07, CA-08, CA-09 | Cada estado é visível/anunciado, o campo continua editável e uma tentativa posterior funciona. |
 | E2E-04 | Impede resposta antiga de substituir a atual | CA-06 | Resposta lenta da query anterior nunca aparece após a query mais recente. |
@@ -590,7 +588,7 @@ Os testes do backend usarão Supertest com `createApp` e provedor injetado. Os t
 | E2E-07 | Cumpre o orçamento de sugestões | CA-01, CA-02, CA-13 | Em 20 amostras controladas, pelo menos 95% exibem até oito sugestões em até 1 s desde o último caractere. |
 | E2E-08 | Mantém a Open-Meteo fora do navegador | CA-04 | A inspeção de rede mostra apenas frontend/backend; search, lookup e forecast partem do servidor. |
 
-O servidor local em `e2e/mock-open-meteo.mjs` terá IDs brasileiros determinísticos, duas cidades homônimas em estados distintos, lookup por ID e controles por query para atraso, vazio e erro. Um smoke opcional com a API real poderá registrar data, ambiente, amostras, p95 e taxa abaixo de 1 segundo, mas não será critério de CI devido à variabilidade externa.
+O servidor local em `e2e/mock-open-meteo.mjs` terá IDs determinísticos de localidades brasileiras e estrangeiras, duas cidades homônimas em estados distintos, lookup por ID e controles por query para atraso, vazio e erro. Um smoke opcional com a API real poderá registrar data, ambiente, amostras, p95 e taxa abaixo de 1 segundo, mas não será critério de CI devido à variabilidade externa.
 
 ## Sequenciamento do desenvolvimento
 
@@ -660,7 +658,7 @@ Alternativas descartadas:
 - **Latência/SLA externo:** o plano gratuito não garante resposta abaixo de 600 ms. Mitigação: estado recuperável, cancelamento, medição p95 e futura revisão do plano; a meta pressupõe dependência disponível.
 - **Cota multiplicada pela digitação:** autocomplete aumenta chamadas externas. Mitigação: mínimo de dois caracteres, debounce, aborto, limite de oito, sem retry e métricas de volume.
 - **Dois caracteres pouco produtivos:** a origem só faz correspondência exata com dois caracteres. Mitigação: documentação/critério explícito e prefixo normal a partir de três.
-- **Payload parcial ou não brasileiro:** a origem pode omitir campos ou desrespeitar filtro. Mitigação: opcionais normalizados, `country_code` validado/filtrado e type guards de `unknown`.
+- **Payload parcial:** a origem pode omitir campos, inclusive país. Mitigação: opcionais normalizados, `country_code` não obrigatório e type guards de `unknown`.
 - **Interação blur versus ponteiro:** clicar em uma opção pode desfocar o input antes da seleção. Mitigação: tratar pointer/mouse down de forma controlada e cobrir em teste.
 - **Anúncios excessivos:** cada tecla pode gerar live region ruidosa. Mitigação: anunciar apenas início efetivo, quantidade final, vazio e falha; não anunciar fase de debounce.
 - **Quebra do contrato antigo:** testes ou consumidores externos desconhecidos podem usar `?city=`. Mitigação: busca no repositório confirma somente o frontend/E2E; migrar todos na mesma entrega e registrar a mudança.

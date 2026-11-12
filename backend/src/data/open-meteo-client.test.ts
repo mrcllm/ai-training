@@ -20,7 +20,7 @@ describe('Open-Meteo client', () => {
     const searchUrl = new URL(fetcher.mock.calls[0][0] as URL);
     const lookupUrl = new URL(fetcher.mock.calls[1][0] as URL);
     const forecastUrl = new URL(fetcher.mock.calls[2][0] as URL);
-    expect(Object.fromEntries(searchUrl.searchParams)).toEqual({ name: 'Sao', count: '8', language: 'pt', countryCode: 'BR', format: 'json' });
+    expect(Object.fromEntries(searchUrl.searchParams)).toEqual({ name: 'Sao', count: '8', language: 'pt', format: 'json' });
     expect(Object.fromEntries(lookupUrl.searchParams)).toEqual({ id: '3448439', language: 'pt' });
     expect(forecastUrl.searchParams.get('latitude')).toBe('-23.55');
     expect(forecastUrl.searchParams.get('current')).toContain('relative_humidity_2m');
