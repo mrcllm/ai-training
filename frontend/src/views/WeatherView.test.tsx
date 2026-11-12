@@ -1,6 +1,8 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchWeather } from '../services/weather-service';
+import { stubBackend } from '../test/backend-stub';
+import { bomJesusPiaui, suggestionsResponse } from '../test/location-fixtures';
 import { weatherResponse } from '../test/weather-fixtures';
 import { WeatherView } from './WeatherView';
 
@@ -8,25 +10,38 @@ vi.mock('../services/weather-service', () => ({ fetchWeather: vi.fn() }));
 
 const mockedFetchWeather = vi.mocked(fetchWeather);
 
-beforeEach(() => vi.resetAllMocks());
+async function selectAndSubmit(): Promise<void> {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Cidade' }), { target: { value: 'Bom' } });
+  fireEvent.click(await screen.findByRole('option', { name: /Piauí/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Consultar clima' }));
+}
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  stubBackend(() => ({ ok: true, body: suggestionsResponse([bomJesusPiaui]) }));
+});
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe('WeatherView', () => {
-  it('shows the weather search and the result after a successful lookup', async () => {
+  it('consulta o clima pelo ID selecionado e mostra o resultado', async () => {
     mockedFetchWeather.mockResolvedValue(weatherResponse);
     render(<WeatherView />);
-    fireEvent.change(screen.getByRole('textbox', { name: 'Cidade' }), { target: { value: 'Lisboa' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Consultar clima' }));
-
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Lisboa, Lisboa, Portugal' })).toBeVisible());
-    expect(screen.getByText('Parcialmente nublado')).toBeVisible();
+    await selectAndSubmit();
+    expect(await screen.findByRole('heading', { name: 'Lisboa, Lisboa, Portugal' })).toBeVisible();
+    expect(mockedFetchWeather).toHaveBeenCalledWith(bomJesusPiaui.id, expect.any(AbortSignal));
   });
 
-  it('presents errors returned from the weather service', async () => {
-    mockedFetchWeather.mockRejectedValue({ kind: 'not-found', message: 'Cidade não encontrada.' });
+  it('apresenta erros retornados pelo weather service', async () => {
+    mockedFetchWeather.mockRejectedValue({ kind: 'not-found', message: 'A localidade selecionada não está mais disponível.' });
     render(<WeatherView />);
-    fireEvent.change(screen.getByRole('textbox', { name: 'Cidade' }), { target: { value: 'Atlantis' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Consultar clima' }));
+    await selectAndSubmit();
+    expect(await screen.findByText('A localidade selecionada não está mais disponível.')).toBeVisible();
+  });
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Cidade não encontrada.');
+  it('explica que a consulta usa a localidade escolhida nas sugestões', () => {
+    render(<WeatherView />);
+    expect(screen.getByText(/escolha uma das sugestões/)).toBeVisible();
+    expect(screen.queryByText(/localidade mais relevante/)).not.toBeInTheDocument();
   });
 });

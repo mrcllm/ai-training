@@ -1,59 +1,50 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fetchWeather } from './weather-service';
+import { stubBackend } from '../test/backend-stub';
 import { weatherResponse } from '../test/weather-fixtures';
 
 const signal = new AbortController().signal;
 
+function stubError(code: string): void {
+  stubBackend(() => ({ ok: false, body: { error: { code, message: 'x' } } }));
+}
+
 afterEach(() => vi.unstubAllGlobals());
 
-describe('fetchWeather', () => {
-  it('requests the requested city and returns a valid weather response', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => weatherResponse,
-    });
-    vi.stubGlobal('fetch', fetchMock);
-
-    await expect(fetchWeather('Lisboa', signal)).resolves.toEqual(weatherResponse);
-    const url = fetchMock.mock.calls[0]?.[0] as URL;
-    const options = fetchMock.mock.calls[0]?.[1] as { signal: AbortSignal };
-    expect(url).toEqual(new URL('http://localhost:3001/weather?city=Lisboa'));
-    expect(options.signal).toBe(signal);
+describe('fetchWeather por locationId (TU-15)', () => {
+  it('envia somente o locationId ao backend e preserva o sinal de cancelamento', async () => {
+    const fetchMock = stubBackend(() => ({ ok: true, body: weatherResponse }));
+    await expect(fetchWeather(3405940, signal)).resolves.toEqual(weatherResponse);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe('http://localhost:3001/weather?locationId=3405940');
+    expect(fetchMock.mock.calls[0]?.[1]).toEqual({ signal });
   });
 
-  it('maps a city validation response to a useful message', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      json: async () => ({ error: { code: 'INVALID_CITY' } }),
-    }));
-
-    await expect(fetchWeather(' ', signal)).rejects.toMatchObject({
-      kind: 'validation',
-      message: 'Informe uma cidade com pelo menos 2 caracteres.',
+  it('orienta nova seleção quando o ID é recusado', async () => {
+    stubError('INVALID_LOCATION_ID');
+    await expect(fetchWeather(1, signal)).rejects.toEqual({
+      kind: 'validation', message: 'Selecione uma localidade da lista antes de consultar o clima.',
     });
   });
 
-  it('maps an unknown city response to a useful message', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      json: async () => ({ error: { code: 'CITY_NOT_FOUND' } }),
-    }));
-
-    await expect(fetchWeather('Atlantis', signal)).rejects.toMatchObject({ kind: 'not-found' });
+  it('orienta nova seleção quando a localidade deixou de existir', async () => {
+    stubError('LOCATION_NOT_FOUND');
+    await expect(fetchWeather(1, signal)).rejects.toEqual({
+      kind: 'not-found', message: 'A localidade selecionada não está mais disponível. Selecione-a novamente.',
+    });
   });
 
-  it('uses a generic error for unrecognized API responses', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      json: async () => ({ error: { code: 'UNEXPECTED' } }),
-    }));
-
-    await expect(fetchWeather('Lisboa', signal)).rejects.toMatchObject({ kind: 'unavailable' });
+  it.each(['WEATHER_PROVIDER_UNAVAILABLE', 'INTERNAL_ERROR', 'DESCONHECIDO'])('trata %s como indisponibilidade', async (code) => {
+    stubError(code);
+    await expect(fetchWeather(1, signal)).rejects.toMatchObject({ kind: 'unavailable' });
   });
 
-  it('rejects malformed successful payloads', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }));
+  it('recusa payload de sucesso malformado', async () => {
+    stubBackend(() => ({ ok: true, body: { ...weatherResponse, units: { temperature: 'F' } } }));
+    await expect(fetchWeather(1, signal)).rejects.toMatchObject({ kind: 'unavailable' });
+  });
 
-    await expect(fetchWeather('Lisboa', signal)).rejects.toMatchObject({ kind: 'unavailable' });
+  it('recusa corpo não JSON', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => { throw new SyntaxError('x'); } }));
+    await expect(fetchWeather(1, signal)).rejects.toMatchObject({ kind: 'unavailable' });
   });
 });

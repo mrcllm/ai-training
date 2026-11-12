@@ -1,4 +1,4 @@
-import { AppError } from '../errors/app-error';
+import { invalidWeatherProviderPayload } from '../errors/provider-unavailable';
 
 const WEATHER_LABELS: Readonly<Record<number, string>> = {
   0: 'Céu limpo',
@@ -35,7 +35,7 @@ const WEATHER_LABELS: Readonly<Record<number, string>> = {
 export function describeWeatherCode(code: number): string {
   const label = WEATHER_LABELS[code];
   if (label === undefined) {
-    throw new AppError(503, 'WEATHER_PROVIDER_UNAVAILABLE', 'O serviço de clima está temporariamente indisponível.', `Código WMO desconhecido: ${code}`);
+    throw invalidWeatherProviderPayload(`Código WMO desconhecido: ${code}`);
   }
   return label;
 }

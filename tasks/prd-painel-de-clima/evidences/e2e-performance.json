@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-11T18:40:30.035Z",
+  "environment": "Playwright Chromium; mock Open-Meteo local com 35 ms por etapa",
+  "samples": 20,
+  "p95Milliseconds": 292,
+  "withinThreeSecondsRate": 1,
+  "elapsedMilliseconds": [
+    474,
+    173,
+    189,
+    292,
+    190,
+    174,
+    155,
+    152,
+    205,
+    131,
+    141,
+    150,
+    124,
+    137,
+    165,
+    166,
+    141,
+    144,
+    187,
+    130
+  ]
+}

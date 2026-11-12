@@ -1,3 +1,5 @@
+import type { SourceAttribution } from './source-attribution';
+
 export type WeatherResponse = {
   location: {
     name: string;
@@ -17,5 +19,5 @@ export type WeatherResponse = {
     humidity: '%';
     windSpeed: 'km/h';
   };
-  source: { name: 'Open-Meteo'; url: 'https://open-meteo.com/' };
+  source: SourceAttribution;
 };

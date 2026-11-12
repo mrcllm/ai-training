@@ -10,23 +10,23 @@ const mockedFetchWeather = vi.mocked(fetchWeather);
 
 beforeEach(() => vi.resetAllMocks());
 
-describe('useWeatherSearch', () => {
+describe('useWeatherSearch (TU-15)', () => {
   it('moves from idle to success after a weather response', async () => {
     mockedFetchWeather.mockResolvedValue(weatherResponse);
     const { result } = renderHook(() => useWeatherSearch());
 
     expect(result.current.state).toEqual({ status: 'idle' });
-    await act(async () => result.current.search('Lisboa'));
+    await act(async () => result.current.search(3405940));
 
     expect(result.current.state).toEqual({ status: 'success', data: weatherResponse });
-    expect(mockedFetchWeather).toHaveBeenCalledWith('Lisboa', expect.any(AbortSignal));
+    expect(mockedFetchWeather).toHaveBeenCalledWith(3405940, expect.any(AbortSignal));
   });
 
   it('keeps a structured weather error from the service', async () => {
     mockedFetchWeather.mockRejectedValue({ kind: 'not-found', message: 'Cidade não encontrada.' });
     const { result } = renderHook(() => useWeatherSearch());
 
-    await act(async () => result.current.search('Atlantis'));
+    await act(async () => result.current.search(1));
 
     expect(result.current.state).toEqual({
       status: 'error',
@@ -38,7 +38,7 @@ describe('useWeatherSearch', () => {
     mockedFetchWeather.mockRejectedValue(new Error('unexpected'));
     const { result } = renderHook(() => useWeatherSearch());
 
-    await act(async () => result.current.search('Lisboa'));
+    await act(async () => result.current.search(3405940));
 
     expect(result.current.state).toEqual({
       status: 'error',
@@ -55,26 +55,45 @@ describe('useWeatherSearch', () => {
     const { result } = renderHook(() => useWeatherSearch());
 
     act(() => {
-      void result.current.search('Lisboa');
+      void result.current.search(3405940);
     });
     await waitFor(() => expect(result.current.state.status).toBe('loading'));
-    await act(async () => result.current.search('Porto'));
+    await act(async () => result.current.search(3469136));
     expect(mockedFetchWeather).toHaveBeenCalledTimes(1);
 
     await act(async () => finishSearch?.(weatherResponse));
     expect(result.current.state.status).toBe('success');
   });
 
+  it('volta ao estado inicial ao limpar um resultado anterior (BUG-01)', async () => {
+    mockedFetchWeather.mockResolvedValue(weatherResponse);
+    const { result } = renderHook(() => useWeatherSearch());
+    await act(async () => result.current.search(3405940));
+    act(() => result.current.reset());
+    expect(result.current.state).toEqual({ status: 'idle' });
+  });
+
+  it('não interrompe uma busca em andamento ao limpar', async () => {
+    mockedFetchWeather.mockImplementation(() => new Promise(() => undefined));
+    const { result } = renderHook(() => useWeatherSearch());
+    act(() => {
+      void result.current.search(3405940);
+    });
+    await waitFor(() => expect(result.current.state.status).toBe('loading'));
+    act(() => result.current.reset());
+    expect(result.current.state.status).toBe('loading');
+  });
+
   it('aborts the active request when the hook unmounts', async () => {
     let requestSignal: AbortSignal | undefined;
-    mockedFetchWeather.mockImplementation((_city, signal) => {
+    mockedFetchWeather.mockImplementation((_locationId, signal) => {
       requestSignal = signal;
       return new Promise(() => undefined);
     });
     const { result, unmount } = renderHook(() => useWeatherSearch());
 
     act(() => {
-      void result.current.search('Lisboa');
+      void result.current.search(3405940);
     });
     await waitFor(() => expect(requestSignal).toBeDefined());
     unmount();

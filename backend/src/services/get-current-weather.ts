@@ -1,5 +1,8 @@
 import { AppError } from '../errors/app-error';
-import { logger } from '../observability/logger';
+import { unexpectedWeatherProviderFailure, weatherProviderAborted } from '../errors/provider-unavailable';
+import { logProviderStep } from './log-provider-step';
+import { createRequestScope } from './request-scope';
+import type { ResolvedLocation } from '../types/resolved-location';
 import type { WeatherProvider } from '../types/weather-provider';
 import type { WeatherResponse } from '../types/weather-response';
 
@@ -8,61 +11,56 @@ type GetCurrentWeatherDependencies = {
   timeoutMs?: number;
   signal?: AbortSignal;
   now?: () => number;
+  requestId?: string;
 };
 
+type ProviderStage = 'location_lookup' | 'forecast';
 const DEFAULT_TIMEOUT_MS = 2500;
-const SOURCE_URL = 'https://open-meteo.com/';
+const SOURCE = { name: 'Open-Meteo' as const, url: 'https://open-meteo.com/' as const };
+const NOT_FOUND_STATUS = 404;
 
-function providerError(): AppError {
-  return new AppError(503, 'WEATHER_PROVIDER_UNAVAILABLE', 'O serviço de clima está temporariamente indisponível.');
+function locationNotFound(): AppError {
+  return new AppError({
+    statusCode: NOT_FOUND_STATUS,
+    code: 'LOCATION_NOT_FOUND',
+    publicMessage: 'A localidade selecionada não está mais disponível. Selecione-a novamente.',
+    outcome: 'location_not_found',
+  });
 }
 
-function logStep(event: 'open_meteo_request_completed' | 'open_meteo_request_failed', stage: string, startedAt: number, now: () => number): void {
-  const context = { stage, durationMs: Math.max(0, now() - startedAt) };
-  if (event === 'open_meteo_request_failed') logger.warn(event, { ...context, outcome: 'failed' });
-  else logger.info(event, { ...context, outcome: 'success' });
+function requireBrazilianLocation(location: ResolvedLocation | null): ResolvedLocation {
+  if (location === null || location.countryCode !== 'BR') throw locationNotFound();
+  return location;
 }
 
-function linkAbortSignal(source: AbortSignal | undefined, controller: AbortController): () => void {
-  if (source === undefined) return () => undefined;
-  if (source.aborted) controller.abort(source.reason);
-  const abort = (): void => controller.abort(source.reason);
-  source.addEventListener('abort', abort, { once: true });
-  return () => source.removeEventListener('abort', abort);
+function normalizeFailure(error: unknown, aborted: boolean): AppError {
+  if (error instanceof AppError
+    && (error.code === 'LOCATION_NOT_FOUND' || error.code === 'WEATHER_PROVIDER_UNAVAILABLE')) return error;
+  if (aborted) return weatherProviderAborted('Consulta meteorológica cancelada');
+  return unexpectedWeatherProviderFailure('Falha inesperada ao consultar a Open-Meteo');
 }
 
-export async function getCurrentWeather(city: string, dependencies: GetCurrentWeatherDependencies): Promise<WeatherResponse> {
+export async function getCurrentWeather(locationId: number, dependencies: GetCurrentWeatherDependencies): Promise<WeatherResponse> {
   const now = dependencies.now ?? Date.now;
-  const controller = new AbortController();
-  const startedAt = now();
-  let stage = 'geocoding';
-  let stageStartedAt = startedAt;
-  const unlinkSignal = linkAbortSignal(dependencies.signal, controller);
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, dependencies.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  const scope = createRequestScope(dependencies.signal, dependencies.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  let stage: ProviderStage = 'location_lookup';
+  let startedAt = now();
   try {
-    const locations = await dependencies.provider.findLocations(city, controller.signal);
-    logStep('open_meteo_request_completed', stage, stageStartedAt, now);
-    if (locations.length === 0) {
-      logger.warn('open_meteo_request_failed', { stage, durationMs: Math.max(0, now() - stageStartedAt), outcome: 'city_not_found' });
-      throw new AppError(404, 'CITY_NOT_FOUND', 'Cidade não encontrada. Revise o nome e tente novamente.');
-    }
+    const location = requireBrazilianLocation(await dependencies.provider.getLocation(locationId, scope.signal));
+    logProviderStep({ status: 'success', stage, startedAt, now, requestId: dependencies.requestId });
     stage = 'forecast';
-    stageStartedAt = now();
-    const conditions = await dependencies.provider.getCurrentConditions(locations[0], controller.signal);
-    logStep('open_meteo_request_completed', stage, stageStartedAt, now);
-    return {
-      location: { name: locations[0].name, admin1: locations[0].admin1, country: locations[0].country },
-      ...conditions,
-      source: { name: 'Open-Meteo', url: SOURCE_URL },
-    };
+    startedAt = now();
+    const conditions = await dependencies.provider.getCurrentConditions(location, scope.signal);
+    logProviderStep({ status: 'success', stage, startedAt, now, requestId: dependencies.requestId });
+    return { location: { name: location.name, admin1: location.admin1, country: location.country }, ...conditions, source: SOURCE };
   } catch (error: unknown) {
-    if (error instanceof AppError && error.code === 'CITY_NOT_FOUND') throw error;
-    logStep('open_meteo_request_failed', stage, stageStartedAt, now);
-    throw providerError();
+    const failure = normalizeFailure(error, scope.signal.aborted);
+    logProviderStep({
+      status: 'failed', stage, startedAt, now,
+      level: failure.logLevel, outcome: failure.outcome, requestId: dependencies.requestId,
+    });
+    throw failure;
   } finally {
-    clearTimeout(timeout);
-    unlinkSignal();
+    scope.close();
   }
 }

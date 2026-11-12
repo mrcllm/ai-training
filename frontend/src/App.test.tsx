@@ -7,6 +7,6 @@ describe('App', () => {
     render(<App />);
 
     expect(screen.getByRole('heading', { name: 'O tempo da sua cidade, sem rodeios.' })).toBeVisible();
-    expect(screen.getByRole('textbox', { name: 'Cidade' })).toBeEnabled();
+    expect(screen.getByRole('combobox', { name: 'Cidade' })).toBeEnabled();
   });
 });

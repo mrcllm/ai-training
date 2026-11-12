@@ -5,19 +5,18 @@ import { WeatherSearchForm } from '../components/WeatherSearchForm';
 import { useWeatherSearch } from '../hooks/useWeatherSearch';
 
 export function WeatherView() {
-  const { state, search } = useWeatherSearch();
+  const { state, search, reset } = useWeatherSearch();
   const isLoading = state.status === 'loading';
-  const error = state.status === 'error' ? state.error : undefined;
   return <main className="min-h-screen bg-[#edf3f4] text-slate-950">
     <div className="mx-auto grid min-h-screen max-w-7xl lg:grid-cols-[minmax(18rem,0.75fr)_minmax(0,1.25fr)]">
       <WeatherIntro />
-      <section className="px-5 py-8 sm:px-10 sm:py-12 lg:px-16 lg:py-16" aria-label="Consulta meteorológica">
+      <section className="px-5 py-8 sm:px-10 sm:py-12 lg:px-16 lg:py-16" aria-label="Consulta meteorológica" aria-busy={isLoading}>
         <div className="mx-auto max-w-2xl">
           <h2 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Qual é o clima agora?</h2>
-          <p className="mt-3 max-w-xl text-base leading-7 text-slate-600">Digite o nome de uma cidade para consultar o tempo neste momento.</p>
+          <p className="mt-3 max-w-xl text-base leading-7 text-slate-600">Digite o nome de uma cidade, escolha uma das sugestões e consulte o tempo neste momento.</p>
           <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_45px_rgba(22,63,75,0.08)] sm:p-7">
-            <WeatherSearchForm isLoading={isLoading} onSearch={search} />
-            <div className="mt-4 min-h-6"><WeatherFeedback isLoading={isLoading} error={error} /></div>
+            <WeatherSearchForm isLoading={isLoading} onSearch={search} onInvalid={reset} />
+            <div className="mt-4 min-h-6"><WeatherFeedback state={state} /></div>
           </div>
           {state.status === 'success' && <div className="mt-6"><WeatherResult weather={state.data} /></div>}
         </div>
@@ -37,11 +36,11 @@ function WeatherIntro() {
           <span className="text-sm font-bold uppercase tracking-[0.14em]">Painel de clima</span>
         </div>
         <h1 className="max-w-lg text-4xl font-bold leading-tight tracking-tight sm:text-5xl">O tempo da sua cidade, sem rodeios.</h1>
-        <p className="mt-6 max-w-md text-base leading-7 text-slate-200">Consulte as condições atuais de qualquer cidade e encontre temperatura, umidade e vento em uma leitura rápida.</p>
+        <p className="mt-6 max-w-md text-base leading-7 text-slate-200">Consulte as condições atuais de cidades brasileiras e encontre temperatura, umidade e vento em uma leitura rápida.</p>
       </div>
       <div className="flex items-start gap-3 border-t border-white/20 pt-5 text-sm leading-6 text-slate-200">
         <Compass size={20} className="mt-1 shrink-0 text-[#f4c95d]" aria-hidden="true" />
-        <p>Os dados são resolvidos pela localidade mais relevante encontrada para sua busca.</p>
+        <p>Os dados correspondem exatamente à localidade que você escolher na lista de sugestões.</p>
       </div>
     </div>
   </aside>;
