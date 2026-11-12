@@ -33,7 +33,7 @@ export async function searchLocations(query: string, dependencies: SearchLocatio
   const scope = createRequestScope(dependencies.signal, dependencies.timeoutMs);
   try {
     const locations = await dependencies.provider.searchLocations(query, scope.signal);
-    const suggestions = locations.filter((location) => location.countryCode === 'BR').slice(0, MAX_SUGGESTIONS).map(toSuggestion);
+    const suggestions = locations.slice(0, MAX_SUGGESTIONS).map(toSuggestion);
     logProviderStep({ status: 'success', stage: 'location_search', startedAt, now, requestId: dependencies.requestId });
     return { suggestions, source: SOURCE };
   } catch (error: unknown) {

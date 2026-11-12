@@ -5,7 +5,7 @@ import type { WeatherProvider } from '../types/weather-provider';
 import { searchLocations } from './search-locations';
 
 const location: ResolvedLocation = {
-  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', countryCode: 'BR', latitude: -23.5, longitude: -46.6,
+  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', latitude: -23.5, longitude: -46.6,
 };
 
 function makeProvider(): WeatherProvider {
@@ -18,11 +18,11 @@ afterEach(() => {
 });
 
 describe('searchLocations', () => {
-  it('mapeia até oito localidades brasileiras e a atribuição', async () => {
+  it('mapeia até oito localidades e a atribuição', async () => {
     const provider = makeProvider();
     const completed = vi.spyOn(logger, 'info').mockImplementation(() => undefined);
     vi.mocked(provider.searchLocations).mockResolvedValue([
-      location, { ...location, id: 2, countryCode: 'US' }, ...Array.from({ length: 9 }, (_, index) => ({ ...location, id: index + 10 })),
+      location, ...Array.from({ length: 9 }, (_, index) => ({ ...location, id: index + 10 })),
     ]);
     const result = await searchLocations('Sao', { provider, timeoutMs: 600, requestId: 'request-1' });
     expect(result.suggestions).toHaveLength(8);
@@ -31,6 +31,17 @@ describe('searchLocations', () => {
     expect(completed).toHaveBeenCalledWith(
       'open_meteo_request_completed', expect.objectContaining({ requestId: 'request-1', stage: 'location_search' }),
     );
+  });
+
+  it('mantém localidades de outros países na ordem da origem', async () => {
+    const provider = makeProvider();
+    const paris = { ...location, id: 2988507, name: 'Paris', admin1: 'Île-de-France', country: 'França' };
+    vi.mocked(provider.searchLocations).mockResolvedValue([paris, location]);
+    const result = await searchLocations('Par', { provider, timeoutMs: 600 });
+    expect(result.suggestions).toEqual([
+      { id: 2988507, name: 'Paris', admin1: 'Île-de-France', country: 'França' },
+      { id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil' },
+    ]);
   });
 
   it('preserva lista vazia como sucesso', async () => {

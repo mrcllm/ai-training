@@ -48,7 +48,6 @@ export function parseLocation(value: unknown, invalid: InvalidPayload): Resolved
     name: requiredName(value.name, 'name', invalid),
     admin1: optionalName(value.admin1, 'admin1', invalid),
     country: optionalName(value.country, 'country', invalid),
-    countryCode: requiredName(value.country_code, 'country_code', invalid),
     latitude: coordinate(value.latitude, LATITUDE_BOUNDS, invalid),
     longitude: coordinate(value.longitude, LONGITUDE_BOUNDS, invalid),
   };

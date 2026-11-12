@@ -7,7 +7,7 @@ export const enMessages: Messages = {
   intro: {
     eyebrow: 'Weather panel',
     title: "Your city's weather, straight to the point.",
-    description: 'Check current conditions for Brazilian cities and see temperature, humidity and wind at a glance.',
+    description: 'Check current conditions for cities around the world and see temperature, humidity and wind at a glance.',
     resolutionNote: 'Data matches exactly the location you choose from the suggestion list.',
   },
   search: {

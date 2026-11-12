@@ -8,7 +8,7 @@ import type { WeatherProvider } from './types/weather-provider';
 
 const environment = loadEnvironment({});
 const location: ResolvedLocation = {
-  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', countryCode: 'BR', latitude: -23.5, longitude: -46.6,
+  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', latitude: -23.5, longitude: -46.6,
 };
 const conditions = {
   current: { temperature: 18.4, apparentTemperature: 17.9, condition: { code: 2, label: 'Parcialmente nublado' }, humidity: 72, windSpeed: 14.2 },
@@ -48,9 +48,17 @@ describe('GET /weather', () => {
     },
   );
 
-  it.each([null, { ...location, countryCode: 'US' }])('retorna 404 para localidade ausente ou estrangeira', async (resolved) => {
+  it('retorna 200 para localidade fora do Brasil', async () => {
     const provider = makeProvider();
-    vi.mocked(provider.getLocation).mockResolvedValue(resolved);
+    vi.mocked(provider.getLocation).mockResolvedValue({ ...location, id: 2988507, name: 'Paris', admin1: 'Île-de-France', country: 'França' });
+    const response = await request(createApp(environment, { weatherProvider: provider })).get('/weather?locationId=2988507');
+    expect(response.status).toBe(200);
+    expect(response.body.location).toEqual({ name: 'Paris', admin1: 'Île-de-France', country: 'França' });
+  });
+
+  it('retorna 404 para localidade ausente', async () => {
+    const provider = makeProvider();
+    vi.mocked(provider.getLocation).mockResolvedValue(null);
     const response = await request(createApp(environment, { weatherProvider: provider })).get('/weather?locationId=3448439');
     expect(response.status).toBe(404);
     expect(response.body.error.code).toBe('LOCATION_NOT_FOUND');

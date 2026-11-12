@@ -8,7 +8,7 @@ import type { WeatherProvider } from './types/weather-provider';
 
 const environment = loadEnvironment({});
 const location: ResolvedLocation = {
-  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', countryCode: 'BR', latitude: -23.5, longitude: -46.6,
+  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', latitude: -23.5, longitude: -46.6,
 };
 
 function makeProvider(): WeatherProvider {

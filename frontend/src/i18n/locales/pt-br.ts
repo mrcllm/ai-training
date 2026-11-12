@@ -7,7 +7,7 @@ export const ptBrMessages: Messages = {
   intro: {
     eyebrow: 'Painel de clima',
     title: 'O tempo da sua cidade, sem rodeios.',
-    description: 'Consulte as condições atuais de cidades brasileiras e encontre temperatura, umidade e vento em uma leitura rápida.',
+    description: 'Consulte as condições atuais de cidades do mundo todo e encontre temperatura, umidade e vento em uma leitura rápida.',
     resolutionNote: 'Os dados correspondem exatamente à localidade que você escolher na lista de sugestões.',
   },
   search: {

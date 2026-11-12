@@ -6,7 +6,7 @@ import type { WeatherProvider } from '../types/weather-provider';
 import { getCurrentWeather } from './get-current-weather';
 
 const location: ResolvedLocation = {
-  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', countryCode: 'BR', latitude: -23.5, longitude: -46.6,
+  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', latitude: -23.5, longitude: -46.6,
 };
 const conditions: ProviderConditions = {
   current: { temperature: 18, apparentTemperature: 17, condition: { code: 2, label: 'Parcialmente nublado' }, humidity: 72, windSpeed: 14 },
@@ -35,9 +35,18 @@ describe('getCurrentWeather', () => {
     );
   });
 
-  it.each([null, { ...location, countryCode: 'US' }])('recusa localidade ausente ou estrangeira', async (resolved) => {
+  it('consulta o clima de localidade estrangeira', async () => {
     const provider = makeProvider();
-    vi.mocked(provider.getLocation).mockResolvedValue(resolved);
+    const paris = { ...location, id: 2988507, name: 'Paris', admin1: 'Île-de-France', country: 'França', latitude: 48.85, longitude: 2.35 };
+    vi.mocked(provider.getLocation).mockResolvedValue(paris);
+    const result = await getCurrentWeather(2988507, { provider });
+    expect(result.location).toEqual({ name: 'Paris', admin1: 'Île-de-France', country: 'França' });
+    expect(provider.getCurrentConditions).toHaveBeenCalledWith(paris, expect.any(AbortSignal));
+  });
+
+  it('recusa localidade ausente', async () => {
+    const provider = makeProvider();
+    vi.mocked(provider.getLocation).mockResolvedValue(null);
     await expect(getCurrentWeather(3448439, { provider })).rejects.toMatchObject({ statusCode: 404, code: 'LOCATION_NOT_FOUND' });
     expect(provider.getCurrentConditions).not.toHaveBeenCalled();
   });

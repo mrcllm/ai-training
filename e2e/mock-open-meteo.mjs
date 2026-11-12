@@ -17,7 +17,7 @@ const LOCATIONS = {
   2988507: { id: 2988507, name: 'Paris', admin1: 'Île-de-France', country: 'França', country_code: 'FR', latitude: 48.85, longitude: 2.35 },
 };
 
-const TEMPERATURES = { '-25.43': 18.4, '-9.07': 31.2, '-28.67': 14.6, '-8.05': 28.4, '-22.6': 24.8, '-23.55': 21.3 };
+const TEMPERATURES = { '-25.43': 18.4, '-9.07': 31.2, '-28.67': 14.6, '-8.05': 28.4, '-22.6': 24.8, '-23.55': 21.3, '48.85': 12.7 };
 
 function sendJson(response, status, body) {
   response.writeHead(status, { 'content-type': 'application/json' });
@@ -30,7 +30,8 @@ function wait(milliseconds) {
 
 function searchResults(name) {
   const query = name.toLocaleLowerCase('pt-BR');
-  if (query.startsWith('bom')) return [LOCATIONS[3405940], LOCATIONS[2988507], LOCATIONS[3469136]];
+  if (query.startsWith('bom')) return [LOCATIONS[3405940], LOCATIONS[3469136]];
+  if (query.startsWith('par')) return [LOCATIONS[2988507]];
   if (query.startsWith('rec')) return [LOCATIONS[3390760]];
   if (query.startsWith('cur')) return [LOCATIONS[6322752]];
   if (query.startsWith('len')) return [LOCATIONS[3458902]];

@@ -29,7 +29,7 @@ Foram lidos `AGENTS.md` e todas as rules em `.agents/rules/`: `code-standards.md
 
 <requirements>
 
-- RF1–RF7: iniciar após dois caracteres, aplicar debounce de 300 ms, exibir até oito sugestões brasileiras e descartar respostas obsoletas.
+- RF1–RF7: iniciar após dois caracteres, aplicar debounce de 300 ms, exibir até oito sugestões de qualquer país e descartar respostas obsoletas.
 - RF8–RF14: mostrar cidade/estado, permitir seleção por ponteiro e teclado, manter identidade por ID, invalidar edição e exigir seleção antes do submit explícito.
 - RF15–RF19: comunicar loading, vazio e falha, limpar estados abaixo do limite e preservar o resultado meteorológico durante sugestões.
 - RF20–RF24: implementar semântica de combobox/listbox/option, opção ativa, navegação por teclas, anúncios e foco visível.
