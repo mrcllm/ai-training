@@ -1,8 +1,8 @@
 import { act, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { fetchWeather } from './services/weather-service';
-import { searchCity, selectLanguage } from './test/app-actions';
+import { searchCity, selectLanguage, stubLocationSearch } from './test/app-actions';
 import { weatherResponse } from './test/weather-fixtures';
 import type { WeatherResponse } from './types/weather-response';
 
@@ -14,13 +14,18 @@ const overcastResponse: WeatherResponse = {
   current: { ...weatherResponse.current, condition: { code: 3, label: 'Encoberto' } },
 };
 
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+  stubLocationSearch();
+});
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe('App language switch', () => {
   it('TI-02 trocar para EN com resultado exibido mantém o resultado e não consulta o backend', async () => {
     mockedFetchWeather.mockResolvedValue(weatherResponse);
     render(<App />);
-    searchCity('Lisboa');
+    await searchCity('Lisboa');
     await screen.findByText('Parcialmente nublado');
 
     selectLanguage('EN English');
@@ -39,35 +44,35 @@ describe('App language switch', () => {
       return new Promise<WeatherResponse>((resolve) => { finishSearch = resolve; });
     });
     render(<App />);
-    searchCity('Lisboa');
+    await searchCity('Lisboa');
 
     selectLanguage('EN English');
-    expect(screen.getByRole('status')).toHaveTextContent('Checking current conditions…');
+    expect(screen.getByText('Checking current conditions…')).toHaveAttribute('role', 'status');
     await act(async () => finishSearch(weatherResponse));
 
     expect(screen.getByText('Partly cloudy')).toBeVisible();
     expect(requestSignal?.aborted).toBe(false);
   });
 
-  it('TI-05 erro de cidade não encontrada é reescrito em inglês', async () => {
+  it('TI-05 erro de localidade não encontrada é reescrito em inglês', async () => {
     mockedFetchWeather.mockRejectedValueOnce({ kind: 'not-found' });
     render(<App />);
-    searchCity('Atlantis');
+    await searchCity('Atlantis');
     await screen.findByRole('alert');
 
     selectLanguage('EN English');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('City not found. Check the name and try again.');
+    expect(screen.getByRole('alert')).toHaveTextContent('The selected location is no longer available. Please select it again.');
   });
 
   it('TI-05 após o erro em inglês uma nova tentativa exibe o resultado', async () => {
     mockedFetchWeather.mockRejectedValueOnce({ kind: 'not-found' }).mockResolvedValueOnce(weatherResponse);
     render(<App />);
-    searchCity('Atlantis');
+    await searchCity('Atlantis');
     await screen.findByRole('alert');
     selectLanguage('EN English');
 
-    searchCity('Lisboa');
+    await searchCity('Lisboa');
 
     expect(await screen.findByText('Partly cloudy')).toBeVisible();
   });
@@ -76,10 +81,10 @@ describe('App language switch', () => {
     mockedFetchWeather.mockResolvedValueOnce(weatherResponse).mockResolvedValueOnce(overcastResponse);
     render(<App />);
     selectLanguage('EN English');
-    searchCity('Lisboa');
+    await searchCity('Lisboa');
     await screen.findByText('Partly cloudy');
 
-    searchCity('Porto');
+    await searchCity('Porto');
 
     expect(await screen.findByText('Overcast')).toBeVisible();
   });

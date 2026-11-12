@@ -3,11 +3,12 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export type ElementBox = { x: number; y: number; width: number; height: number };
 
 export const RESULT_SELECTOR = '[aria-labelledby="weather-result-title"]';
-const MOCK_RESOLVED_LOCATION_HEADING = 'Paris, Île-de-France, França';
+const MOCK_RESOLVED_LOCATION_HEADING = 'Curitiba, Paraná, Brasil';
 const CURRENT_TEMPERATURE_LABEL = 'Temperatura atual';
 
 export async function searchCity(page: Page, city: string): Promise<void> {
-  await page.getByRole('textbox', { name: 'Cidade' }).fill(city);
+  await page.getByRole('combobox', { name: 'Cidade' }).fill(city);
+  await page.getByRole('option', { name: new RegExp(`^${city}`) }).click();
   const weatherResponse = page.waitForResponse((response) => response.url().includes('/weather?'));
   await page.getByRole('button', { name: 'Consultar clima' }).click();
   await weatherResponse;

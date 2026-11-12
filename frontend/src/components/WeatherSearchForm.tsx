@@ -1,43 +1,31 @@
-import { useState, type FormEvent } from 'react';
 import { useLanguage } from '../hooks/useLanguage';
-import type { CityValidationError } from '../types/city-validation-error';
-
-const MIN_CITY_CHARACTERS = 2;
-const MAX_CITY_CHARACTERS = 100;
+import { useLocationSelection } from '../hooks/useLocationSelection';
+import { LocationAutocomplete } from './LocationAutocomplete';
 
 type WeatherSearchFormProps = {
   isLoading: boolean;
-  onSearch: (city: string) => void;
+  onSearch: (locationId: number) => void;
+  onInvalid: () => void;
 };
 
-function validateCity(city: string): CityValidationError | null {
-  const usefulCharacters = Array.from(city.replace(/\s/g, ''));
-  if (usefulCharacters.length < MIN_CITY_CHARACTERS) return 'too-short';
-  if (Array.from(city).length > MAX_CITY_CHARACTERS) return 'too-long';
-  return null;
+type SubmitButtonProps = {
+  isLoading: boolean;
+};
+
+export function WeatherSearchForm({ isLoading, onSearch, onInvalid }: WeatherSearchFormProps) {
+  const { messages } = useLanguage();
+  const selection = useLocationSelection({ isLoading, onSearch, onInvalid });
+  const error = selection.isSelectionMissing ? messages.search.selectionRequired : null;
+  return <form onSubmit={selection.submit} className="flex flex-col gap-3 sm:flex-row sm:items-start">
+    <LocationAutocomplete value={selection.value} selectedLocation={selection.selectedLocation} error={error}
+      disabled={isLoading} onValueChange={selection.changeValue} onSelect={selection.select} />
+    <SubmitButton isLoading={isLoading} />
+  </form>;
 }
 
-export function WeatherSearchForm({ isLoading, onSearch }: WeatherSearchFormProps) {
+function SubmitButton({ isLoading }: SubmitButtonProps) {
   const { messages } = useLanguage();
-  const [city, setCity] = useState('');
-  const [validationError, setValidationError] = useState<CityValidationError | null>(null);
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const error = validateCity(city.trim());
-    setValidationError(error);
-    if (!error) onSearch(city.trim());
-  };
-  return <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-    <div className="min-w-0 flex-1">
-      <label htmlFor="city" className="mb-2 block text-sm font-semibold text-slate-800">{messages.search.cityLabel}</label>
-      <input id="city" name="city" value={city} onChange={(event) => { setCity(event.target.value); setValidationError(null); }}
-        aria-invalid={validationError !== null} aria-describedby={validationError ? 'city-error' : undefined}
-        autoComplete="address-level2" placeholder={messages.search.cityPlaceholder} disabled={isLoading}
-        className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-base text-slate-950 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#1b6172]/15 focus-visible:border-[#1b6172] disabled:bg-slate-100" />
-      {validationError && <p id="city-error" role="alert" className="mt-2 text-sm font-medium text-red-800">{messages.validation[validationError]}</p>}
-    </div>
-    <button type="submit" disabled={isLoading} className="h-12 shrink-0 rounded-xl bg-[#163f4b] px-6 font-semibold text-white transition-colors hover:bg-[#0f303a] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f4c95d]/60 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60">
-      {isLoading ? messages.search.submitting : messages.search.submit}
-    </button>
-  </form>;
+  return <button type="submit" aria-disabled={isLoading} className="h-12 shrink-0 rounded-xl bg-[#163f4b] px-6 font-semibold text-white transition-colors hover:bg-[#0f303a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b6172] focus-visible:ring-offset-2 aria-disabled:cursor-wait aria-disabled:opacity-60 sm:mt-7">
+    {isLoading ? messages.search.submitting : messages.search.submit}
+  </button>;
 }

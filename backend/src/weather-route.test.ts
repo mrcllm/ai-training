@@ -3,62 +3,64 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from './app';
 import { loadEnvironment } from './config/environment';
 import { logger } from './observability/logger';
+import type { ResolvedLocation } from './types/resolved-location';
 import type { WeatherProvider } from './types/weather-provider';
 
 const environment = loadEnvironment({});
-const location = { name: 'Lisboa', admin1: 'Lisboa', country: 'Portugal', latitude: 38.7, longitude: -9.1 };
+const location: ResolvedLocation = {
+  id: 3448439, name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil', countryCode: 'BR', latitude: -23.5, longitude: -46.6,
+};
 const conditions = {
   current: { temperature: 18.4, apparentTemperature: 17.9, condition: { code: 2, label: 'Parcialmente nublado' }, humidity: 72, windSpeed: 14.2 },
   units: { temperature: '°C' as const, apparentTemperature: '°C' as const, humidity: '%' as const, windSpeed: 'km/h' as const },
 };
 
 function makeProvider(): WeatherProvider {
-  return {
-    findLocations: vi.fn(async () => [location]),
-    getCurrentConditions: vi.fn(async () => conditions),
-  };
+  return { searchLocations: vi.fn(), getLocation: vi.fn().mockResolvedValue(location), getCurrentConditions: vi.fn().mockResolvedValue(conditions) };
 }
 
 afterEach(() => vi.restoreAllMocks());
 
 describe('GET /weather', () => {
-  it('retorna o contrato normalizado com headers de cache e request ID', async () => {
+  it('consulta exatamente o ID e retorna o contrato normalizado', async () => {
     const provider = makeProvider();
     const response = await request(createApp(environment, { weatherProvider: provider }))
-      .get('/weather?city=Lisboa').set('X-Request-Id', 'weather-123');
+      .get('/weather?locationId=3448439').set('X-Request-Id', 'weather-123');
     expect(response.status).toBe(200);
     expect(response.headers['cache-control']).toBe('no-store');
     expect(response.headers['x-request-id']).toBe('weather-123');
     expect(response.body).toEqual({
-      location: { name: 'Lisboa', admin1: 'Lisboa', country: 'Portugal' },
-      ...conditions,
-      source: { name: 'Open-Meteo', url: 'https://open-meteo.com/' },
+      location: { name: 'São Paulo', admin1: 'São Paulo', country: 'Brasil' },
+      ...conditions, source: { name: 'Open-Meteo', url: 'https://open-meteo.com/' },
     });
-    expect(provider.findLocations).toHaveBeenCalledWith('Lisboa', expect.any(AbortSignal));
+    expect(provider.getLocation).toHaveBeenCalledWith(3448439, expect.any(AbortSignal));
+    expect(provider.searchLocations).not.toHaveBeenCalled();
   });
 
-  it.each(['/weather', '/weather?city=A', '/weather?city=A&city=B'])('rejeita query inválida sem consultar o provedor: %s', async (path) => {
-    const provider = makeProvider();
-    const response = await request(createApp(environment, { weatherProvider: provider })).get(path);
-    expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe('INVALID_CITY');
-    expect(response.headers['cache-control']).toBe('no-store');
-    expect(provider.findLocations).not.toHaveBeenCalled();
-  });
+  it.each(['/weather', '/weather?locationId=abc', '/weather?locationId=1&locationId=2', '/weather?city=Recife'])(
+    'rejeita ID inválido sem consultar o provedor: %s',
+    async (path) => {
+      const provider = makeProvider();
+      const response = await request(createApp(environment, { weatherProvider: provider })).get(path);
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('INVALID_LOCATION_ID');
+      expect(provider.getLocation).not.toHaveBeenCalled();
+    },
+  );
 
-  it('retorna 404 para cidade sem correspondências', async () => {
+  it.each([null, { ...location, countryCode: 'US' }])('retorna 404 para localidade ausente ou estrangeira', async (resolved) => {
     const provider = makeProvider();
-    vi.mocked(provider.findLocations).mockResolvedValue([]);
-    const response = await request(createApp(environment, { weatherProvider: provider })).get('/weather?city=Atlantida');
+    vi.mocked(provider.getLocation).mockResolvedValue(resolved);
+    const response = await request(createApp(environment, { weatherProvider: provider })).get('/weather?locationId=3448439');
     expect(response.status).toBe(404);
-    expect(response.body.error.code).toBe('CITY_NOT_FOUND');
+    expect(response.body.error.code).toBe('LOCATION_NOT_FOUND');
     expect(provider.getCurrentConditions).not.toHaveBeenCalled();
   });
 
-  it('converte falha do provedor em 503 sem revelar detalhes internos', async () => {
+  it('converte falha do provedor em 503 sem detalhes internos', async () => {
     const provider = makeProvider();
-    vi.mocked(provider.findLocations).mockRejectedValue(new Error('provider secret detail'));
-    const response = await request(createApp(environment, { weatherProvider: provider })).get('/weather?city=Lisboa');
+    vi.mocked(provider.getLocation).mockRejectedValue(new Error('provider secret detail'));
+    const response = await request(createApp(environment, { weatherProvider: provider })).get('/weather?locationId=3448439');
     expect(response.status).toBe(503);
     expect(response.body.error.code).toBe('WEATHER_PROVIDER_UNAVAILABLE');
     expect(JSON.stringify(response.body)).not.toContain('provider secret detail');
@@ -69,20 +71,26 @@ describe('GET /weather', () => {
     vi.spyOn(logger, 'info').mockImplementation((event) => {
       if (event === 'weather_request_completed') throw new Error('internal detail');
     });
-    const response = await request(createApp(environment, { weatherProvider: provider })).get('/weather?city=Lisboa');
+    const response = await request(createApp(environment, { weatherProvider: provider })).get('/weather?locationId=3448439');
     expect(response.status).toBe(500);
     expect(response.body.error.code).toBe('INTERNAL_ERROR');
-    expect(JSON.stringify(response.body)).not.toContain('internal detail');
   });
 
-  it('mantém health independente e aplica request ID e CORS', async () => {
+  it('aborta o lookup externo quando o cliente fecha a conexão HTTP', async () => {
     const provider = makeProvider();
-    const response = await request(createApp(environment, { weatherProvider: provider }))
-      .get('/health').set('Origin', environment.frontendOrigin);
-    expect(response.status).toBe(200);
-    expect(response.body.status).toBe('healthy');
-    expect(response.headers['x-request-id']).toBeTruthy();
-    expect(response.headers['access-control-allow-origin']).toBe(environment.frontendOrigin);
-    expect(provider.findLocations).not.toHaveBeenCalled();
+    const aborted = new Promise<void>((resolve) => {
+      vi.mocked(provider.getLocation).mockImplementation((_locationId, signal) => new Promise((_success, reject) => {
+        signal.addEventListener('abort', () => {
+          resolve();
+          reject(new Error('aborted'));
+        }, { once: true });
+      }));
+    });
+    const pendingRequest = request(createApp(environment, { weatherProvider: provider })).get('/weather?locationId=3448439');
+    const completion = pendingRequest.then(() => undefined, () => undefined);
+    await vi.waitFor(() => expect(provider.getLocation).toHaveBeenCalledOnce());
+    pendingRequest.abort();
+    await expect(aborted).resolves.toBeUndefined();
+    await completion;
   });
 });

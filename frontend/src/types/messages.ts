@@ -1,5 +1,5 @@
 import type { UiWeatherError } from './api-error';
-import type { CityValidationError } from './city-validation-error';
+import type { UiLocationError } from './ui-location-error';
 import type { WeatherConditionCode } from './weather-condition-code';
 
 export type Messages = Readonly<{
@@ -19,9 +19,18 @@ export type Messages = Readonly<{
     cityPlaceholder: string;
     submit: string;
     submitting: string;
+    selectionRequired: string;
   }>;
-  validation: Readonly<Record<CityValidationError, string>>;
-  feedback: Readonly<{ loading: string }>;
+  locationSearch: Readonly<{
+    listLabel: string;
+    loading: string;
+    empty: string;
+    foundOne: string;
+    foundMany: string;
+    retry: string;
+  }>;
+  locationErrors: Readonly<Record<UiLocationError['kind'], string>>;
+  feedback: Readonly<{ loading: string; success: string }>;
   errors: Readonly<Record<UiWeatherError['kind'], string>>;
   result: Readonly<{
     locationEyebrow: string;
@@ -31,6 +40,6 @@ export type Messages = Readonly<{
     windSpeed: string;
   }>;
   temperatureUnit: Readonly<{ showIn: string; displayedIn: string }>;
-  source: Readonly<{ dataBy: string }>;
+  source: Readonly<{ weatherDataBy: string; locationsBy: string; opensInNewTab: string }>;
   conditions: Readonly<Record<WeatherConditionCode, string>>;
 }>;

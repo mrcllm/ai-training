@@ -2,16 +2,20 @@ export type Environment = {
   port: number;
   frontendOrigin: string;
   geocodingUrl: string;
+  geocodingLookupUrl: string;
   forecastUrl: string;
+  locationSearchTimeoutMs: number;
   weatherTimeoutMs: number;
   shutdownTimeoutMs: number;
 };
 
 const DEFAULTS = {
   port: 3001,
-  frontendOrigin: 'http://localhost:3000',
+  frontendOrigin: 'http://localhost:5173',
   geocodingUrl: 'https://geocoding-api.open-meteo.com/v1/search',
+  geocodingLookupUrl: 'https://geocoding-api.open-meteo.com/v1/get',
   forecastUrl: 'https://api.open-meteo.com/v1/forecast',
+  locationSearchTimeoutMs: 600,
   weatherTimeoutMs: 2500,
   shutdownTimeoutMs: 10000,
 };
@@ -47,13 +51,24 @@ function parseOrigin(value: string | undefined): string {
 export function loadEnvironment(source: NodeJS.ProcessEnv = process.env): Environment {
   const port = parseInteger(source.PORT, DEFAULTS.port, 'PORT');
   if (port > 65535) throw new Error('PORT deve ser menor ou igual a 65535');
+  const locationSearchTimeoutMs = parseInteger(
+    source.OPEN_METEO_LOCATION_SEARCH_TIMEOUT_MS,
+    DEFAULTS.locationSearchTimeoutMs,
+    'OPEN_METEO_LOCATION_SEARCH_TIMEOUT_MS',
+  );
   const weatherTimeoutMs = parseInteger(source.OPEN_METEO_TIMEOUT_MS, DEFAULTS.weatherTimeoutMs, 'OPEN_METEO_TIMEOUT_MS');
   const shutdownTimeoutMs = parseInteger(source.SHUTDOWN_TIMEOUT_MS, DEFAULTS.shutdownTimeoutMs, 'SHUTDOWN_TIMEOUT_MS');
   return {
     port,
     frontendOrigin: parseOrigin(source.FRONTEND_ORIGIN),
     geocodingUrl: parseUrl(source.OPEN_METEO_GEOCODING_URL, DEFAULTS.geocodingUrl, 'OPEN_METEO_GEOCODING_URL'),
+    geocodingLookupUrl: parseUrl(
+      source.OPEN_METEO_GEOCODING_LOOKUP_URL,
+      DEFAULTS.geocodingLookupUrl,
+      'OPEN_METEO_GEOCODING_LOOKUP_URL',
+    ),
     forecastUrl: parseUrl(source.OPEN_METEO_FORECAST_URL, DEFAULTS.forecastUrl, 'OPEN_METEO_FORECAST_URL'),
+    locationSearchTimeoutMs,
     weatherTimeoutMs,
     shutdownTimeoutMs,
   };

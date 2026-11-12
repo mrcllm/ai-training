@@ -1,16 +1,9 @@
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../app';
-import type { Environment } from '../config/environment';
+import { loadEnvironment } from '../config/environment';
 
-const environment: Environment = {
-  port: 3001,
-  frontendOrigin: 'http://localhost:3000',
-  geocodingUrl: 'https://geocoding-api.open-meteo.com/v1/search',
-  forecastUrl: 'https://api.open-meteo.com/v1/forecast',
-  weatherTimeoutMs: 2500,
-  shutdownTimeoutMs: 10000,
-};
+const environment = loadEnvironment({});
 
 afterEach(() => vi.restoreAllMocks());
 

@@ -10,7 +10,7 @@ const mockServer = {
 };
 const backendEnvironment = USE_REAL_PROVIDER
   ? `PORT=${BACKEND_PORT} FRONTEND_ORIGIN=http://127.0.0.1:${FRONTEND_PORT}`
-  : `PORT=${BACKEND_PORT} FRONTEND_ORIGIN=http://127.0.0.1:${FRONTEND_PORT} OPEN_METEO_GEOCODING_URL=http://127.0.0.1:${MOCK_PORT}/v1/search OPEN_METEO_FORECAST_URL=http://127.0.0.1:${MOCK_PORT}/v1/forecast`;
+  : `PORT=${BACKEND_PORT} FRONTEND_ORIGIN=http://127.0.0.1:${FRONTEND_PORT} OPEN_METEO_GEOCODING_URL=http://127.0.0.1:${MOCK_PORT}/v1/search OPEN_METEO_GEOCODING_LOOKUP_URL=http://127.0.0.1:${MOCK_PORT}/v1/get OPEN_METEO_FORECAST_URL=http://127.0.0.1:${MOCK_PORT}/v1/forecast`;
 
 export default defineConfig({
   testDir: '.',

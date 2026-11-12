@@ -22,17 +22,22 @@ describe('convertCelsiusToFahrenheit', () => {
 
 describe('formatTemperature', () => {
   it('TU-03 formata o valor convertido com o símbolo °F', () => {
-    const results = [formatTemperature(25, '°F'), formatTemperature(27, '°F')];
+    const results = [formatTemperature(25, '°F', 'en'), formatTemperature(27, '°F', 'en')];
     expect(results).toEqual(['77 °F', '80.6 °F']);
   });
 
+  it('TU-03 usa o separador decimal do idioma ativo', () => {
+    const results = [formatTemperature(27, '°F', 'pt-BR'), formatTemperature(22.5, '°C', 'pt-BR')];
+    expect(results).toEqual(['80,6 °F', '22,5 °C']);
+  });
+
   it('TU-04 preserva o valor original em °C sem arredondar', () => {
-    const result = formatTemperature(22.5, '°C');
+    const result = formatTemperature(22.5, '°C', 'en');
     expect(result).toBe('22.5 °C');
   });
 
   it('TU-05 nunca exibe "-0" em °F', () => {
-    const result = formatTemperature(-17.8, '°F');
+    const result = formatTemperature(-17.8, '°F', 'pt-BR');
     expect(result).toBe('0 °F');
   });
 });

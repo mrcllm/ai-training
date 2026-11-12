@@ -1,0 +1,7 @@
+{
+  "results": [
+    { "id": 3448439, "name": "São Paulo", "latitude": -23.55, "longitude": -46.63, "admin1": "São Paulo", "country": "Brasil", "country_code": "BR" },
+    { "id": 3388368, "name": "São Luís", "latitude": -2.53, "longitude": -44.3, "country": "Brasil", "country_code": "BR" },
+    { "id": 5128581, "name": "São Paulo", "latitude": 40.7, "longitude": -74, "admin1": "New York", "country": "Estados Unidos", "country_code": "US" }
+  ]
+}

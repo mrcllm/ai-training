@@ -10,9 +10,23 @@ export function isWeatherRequest(url: URL): boolean {
   return url.pathname === WEATHER_PATH;
 }
 
-export async function searchCity(page: Page, city: string): Promise<void> {
-  await page.getByRole('textbox').fill(city);
+export async function submitTypedText(page: Page, text: string): Promise<void> {
+  await page.getByRole('combobox').fill(text);
   await page.getByRole('button', { name: SUBMIT_BUTTON_NAME }).click();
+}
+
+export async function searchCity(page: Page, city: string): Promise<void> {
+  await page.getByRole('combobox').fill(city);
+  await page.getByRole('option', { name: new RegExp(`^${city}`) }).click();
+  await page.getByRole('button', { name: SUBMIT_BUTTON_NAME }).click();
+}
+
+export async function failWeatherWithLocationNotFound(page: Page): Promise<void> {
+  await page.route(isWeatherRequest, (route) => route.fulfill({
+    status: 404,
+    contentType: 'application/json',
+    body: JSON.stringify({ error: { code: 'LOCATION_NOT_FOUND', message: 'Location not found' } }),
+  }));
 }
 
 export async function selectLanguage(page: Page, option: string): Promise<void> {

@@ -79,7 +79,7 @@ test('E2E-17 verificação automatizada sem violações críticas ou sérias em 
 
 test('E2E-17 verificação automatizada sem violações críticas ou sérias em PT e em EN com resultado', async ({ page }) => {
   await page.goto('/');
-  await searchCity(page, 'Paris');
+  await searchCity(page, 'Curitiba');
   await expect(page.getByText('Predominantemente limpo')).toBeVisible();
   expect(await findBlockingViolations(page)).toEqual([]);
   await selectLanguage(page, ENGLISH_OPTION);

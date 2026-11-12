@@ -1,22 +1,19 @@
-import type { ApiErrorCode, UiWeatherError } from '../types/api-error';
+import { getJson, isRecord, isSourceAttribution, readApiErrorCode } from './api-client';
+import type { UiWeatherError } from '../types/api-error';
 import type { WeatherResponse } from '../types/weather-response';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3001';
-const ERROR_KINDS: Record<ApiErrorCode, UiWeatherError> = {
-  INVALID_CITY: { kind: 'validation' },
-  CITY_NOT_FOUND: { kind: 'not-found' },
-  WEATHER_PROVIDER_UNAVAILABLE: { kind: 'unavailable' },
-  INTERNAL_ERROR: { kind: 'unavailable' },
-};
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
+const UNAVAILABLE_ERROR: UiWeatherError = { kind: 'unavailable' };
+const ERRORS = {
+  INVALID_LOCATION_ID: { kind: 'validation' },
+  LOCATION_NOT_FOUND: { kind: 'not-found' },
+  WEATHER_PROVIDER_UNAVAILABLE: UNAVAILABLE_ERROR,
+  INTERNAL_ERROR: UNAVAILABLE_ERROR,
+} satisfies Record<string, UiWeatherError>;
 
 function isWeatherResponse(value: unknown): value is WeatherResponse {
   if (!isRecord(value) || !isRecord(value.location) || !isRecord(value.current)) return false;
   return hasLocation(value.location) && hasConditions(value.current)
-    && isWeatherMetadata(value.units, value.source);
+    && hasMetricUnits(value.units) && isSourceAttribution(value.source);
 }
 
 function hasLocation(value: Record<string, unknown>): boolean {
@@ -36,26 +33,15 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
-function isWeatherMetadata(units: unknown, source: unknown): boolean {
-  if (!isRecord(units) || !isRecord(source)) return false;
+function hasMetricUnits(units: unknown): boolean {
+  if (!isRecord(units)) return false;
   return units.temperature === '°C' && units.apparentTemperature === '°C'
-    && units.humidity === '%' && units.windSpeed === 'km/h'
-    && source.name === 'Open-Meteo' && source.url === 'https://open-meteo.com/';
+    && units.humidity === '%' && units.windSpeed === 'km/h';
 }
 
-function getApiErrorCode(value: unknown): ApiErrorCode | undefined {
-  if (!isRecord(value) || !isRecord(value.error)) return undefined;
-  const code = value.error.code;
-  return typeof code === 'string' && Object.prototype.hasOwnProperty.call(ERROR_KINDS, code)
-    ? code as ApiErrorCode : undefined;
-}
-
-export async function fetchWeather(city: string, signal: AbortSignal): Promise<WeatherResponse> {
-  const endpoint = new URL('/weather', API_BASE_URL);
-  endpoint.searchParams.set('city', city);
-  const response = await fetch(endpoint, { signal });
-  const payload: unknown = await response.json().catch(() => undefined);
-  if (!response.ok) throw ERROR_KINDS[getApiErrorCode(payload) ?? 'WEATHER_PROVIDER_UNAVAILABLE'];
-  if (!isWeatherResponse(payload)) throw ERROR_KINDS.WEATHER_PROVIDER_UNAVAILABLE;
-  return payload;
+export async function fetchWeather(locationId: number, signal: AbortSignal): Promise<WeatherResponse> {
+  const reply = await getJson('/weather', { locationId: String(locationId) }, signal);
+  if (!reply.ok) throw ERRORS[readApiErrorCode(reply.payload, ERRORS) ?? 'WEATHER_PROVIDER_UNAVAILABLE'];
+  if (!isWeatherResponse(reply.payload)) throw UNAVAILABLE_ERROR;
+  return reply.payload;
 }

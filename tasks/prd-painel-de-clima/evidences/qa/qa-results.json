@@ -1,0 +1,152 @@
+{
+  "INICIAL": {
+    "status": "INFO",
+    "evidence": "evidences/qa/ca00-idle-1280.png",
+    "title": "Clima agora — condições atuais por cidade",
+    "lang": "pt-BR"
+  },
+  "CA-01": {
+    "status": "PASSOU",
+    "heading": "Paris, Île-de-France, França",
+    "evidence": "evidences/qa/ca01-ca02-ca03-ca13-success-1280.png"
+  },
+  "CA-02": {
+    "status": "PASSOU",
+    "heading": "Paris, Île-de-France, França"
+  },
+  "CA-03": {
+    "status": "PASSOU",
+    "values": {
+      "temperatura": [
+        "18,4 °C",
+        "17,2 °C"
+      ],
+      "umidade": [
+        "61 %"
+      ],
+      "vento": [
+        "12,3 km/h"
+      ]
+    },
+    "decimalSeparator": "vírgula (pt-BR)"
+  },
+  "CA-13": {
+    "status": "PASSOU",
+    "href": "https://open-meteo.com/",
+    "text": "Dados meteorológicos por Open-Meteo\n(abre em nova aba)\n."
+  },
+  "CA-04": {
+    "status": "PASSOU",
+    "weatherCalls": [
+      "http://127.0.0.1:3002/weather?city=Paris"
+    ],
+    "external": []
+  },
+  "CA-05": {
+    "status": "PASSOU",
+    "invalidAlert": "Informe uma cidade com pelo menos 2 caracteres.",
+    "describedBy": "city-error",
+    "invalidState": "true",
+    "resultStillVisible": 0,
+    "evidence": "evidences/qa/ca05-validation-1280.png"
+  },
+  "CA-06": {
+    "status": "PASSOU",
+    "notFound": "Cidade não encontrada. Revise o nome e tente novamente.",
+    "evidence": "evidences/qa/ca06-not-found-1280.png"
+  },
+  "CA-07": {
+    "status": "PASSOU",
+    "unavailable": "Não foi possível consultar o clima agora. Tente novamente em instantes.",
+    "staleResult": 0,
+    "retried": true,
+    "evidence": "evidences/qa/ca07-provider-unavailable-1280.png"
+  },
+  "CA-08": {
+    "status": "PASSOU",
+    "loadingText": "Consultando as condições atuais…",
+    "buttonState": {
+      "disabled": true,
+      "ariaDisabled": "true"
+    },
+    "slowCalls": 1,
+    "evidence": "evidences/qa/ca08-loading-1280.png"
+  },
+  "FOCO-APOS-ENVIO-CLIQUE": {
+    "status": "PASSOU",
+    "focusDuringLoading": "button \"Consultando…\"",
+    "focusAfterLoading": "button \"Consultar clima\""
+  },
+  "CA-10": {
+    "status": "PASSOU",
+    "tabOrder": [
+      "body \"Painel de climaO tempo da sua \"",
+      "input#city",
+      "button \"Consultar clima\""
+    ],
+    "linkAfterButton": "a \"Open-Meteo (abre em nova aba)\"",
+    "focusAfterEnterLoading": "input#city",
+    "focusAfterEnterDone": "input#city",
+    "nextAfterResult": "button \"Consultar clima\"",
+    "focusStyles": {
+      "button": {
+        "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(27, 97, 114) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+        "outline": "solid 2px rgba(0, 0, 0, 0)",
+        "border": "rgb(229, 231, 235)"
+      }
+    },
+    "evidences": [
+      "evidences/qa/ca10-link-focus-1280.png",
+      "evidences/qa/ca10-input-focus-1280.png",
+      "evidences/qa/ca10-button-focus-1280.png"
+    ]
+  },
+  "CA-11": {
+    "status": "PASSOU",
+    "liveRegionsOnSuccess": [
+      {
+        "tag": "P",
+        "role": "status",
+        "live": "polite",
+        "text": "Condições atuais carregadas para Paris, Île-de-Fra"
+      }
+    ]
+  },
+  "CA-12@360": {
+    "status": "PASSOU",
+    "idleOverflow": false,
+    "successOverflow": false,
+    "evidences": [
+      "evidences/qa/ca12-success-360.png",
+      "evidences/qa/ca12-error-360.png"
+    ]
+  },
+  "CA-12@1280": {
+    "status": "PASSOU",
+    "idleOverflow": false,
+    "successOverflow": false,
+    "evidences": [
+      "evidences/qa/ca12-success-1280.png",
+      "evidences/qa/ca12-error-1280.png"
+    ]
+  },
+  "BORDA-NOME-LONGO@360": {
+    "status": "PASSOU",
+    "longOverflow": false
+  },
+  "A11Y-FONTES-IMAGENS": {
+    "status": "PASSOU",
+    "fontsBelow12px": [],
+    "images": [],
+    "svgsWithoutAriaHidden": 0
+  },
+  "CONSOLE": {
+    "status": "PASSOU",
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+      "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+      "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    ]
+  }
+}
