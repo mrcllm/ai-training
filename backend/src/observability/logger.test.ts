@@ -18,10 +18,13 @@ describe('logger', () => {
 
   it('removes sensitive context fields from every log entry', () => {
     const output = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    logger.info('weather_event', { requestId: 'r-2', city: 'Lisboa', coordinates: '1,2', payload: 'raw' });
+    logger.info('weather_event', {
+      requestId: 'r-2', city: 'Lisboa', locationId: 123, coordinates: '1,2', payload: 'raw',
+    });
     const entry = String(output.mock.calls[0][0]);
     expect(entry).toContain('requestId');
     expect(entry).not.toContain('Lisboa');
+    expect(entry).not.toContain('123');
     expect(entry).not.toContain('coordinates');
     expect(entry).not.toContain('raw');
   });

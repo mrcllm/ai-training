@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AppError } from '../errors/app-error';
+import { invalidLocationProviderPayload, weatherProviderUnavailable } from '../errors/provider-unavailable';
 import { logger } from '../observability/logger';
 import { errorHandler } from './error-handler';
 
@@ -15,11 +16,13 @@ function invokeErrorHandler(error: unknown): { status: number; body: unknown } {
   return result;
 }
 
+afterEach(() => vi.restoreAllMocks());
+
 describe('errorHandler', () => {
   it('returns the stable public envelope for application errors', () => {
     vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
-    const result = invokeErrorHandler(new AppError(404, 'CITY_NOT_FOUND', 'Cidade não encontrada.', 'private detail'));
-    expect(result).toEqual({ status: 404, body: { error: { code: 'CITY_NOT_FOUND', message: 'Cidade não encontrada.' } } });
+    const result = invokeErrorHandler(new AppError({ statusCode: 404, code: 'LOCATION_NOT_FOUND', publicMessage: 'Localidade não encontrada.', detail: 'private detail' }));
+    expect(result).toEqual({ status: 404, body: { error: { code: 'LOCATION_NOT_FOUND', message: 'Localidade não encontrada.' } } });
   });
 
   it('does not expose unexpected internal error details', () => {
@@ -32,8 +35,35 @@ describe('errorHandler', () => {
 
   it('logs known errors without writing their private message to the response', () => {
     vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
-    const result = invokeErrorHandler(new AppError(400, 'INVALID_CITY', 'Cidade inválida.', 'raw input detail'));
+    const result = invokeErrorHandler(new AppError({ statusCode: 400, code: 'INVALID_LOCATION_ID', publicMessage: 'Localidade inválida.', detail: 'raw input detail' }));
     expect(JSON.stringify(result.body)).not.toContain('raw input detail');
+  });
+
+  it('registra indisponibilidade do provedor como aviso, sem nível de erro interno', () => {
+    const warn = vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const error = vi.spyOn(logger, 'error').mockImplementation(() => undefined);
+    const result = invokeErrorHandler(weatherProviderUnavailable('HTTP 502'));
+    expect(result.status).toBe(503);
+    expect(warn).toHaveBeenCalledWith('http_request_failed', expect.objectContaining({ code: 'WEATHER_PROVIDER_UNAVAILABLE' }));
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  it('registra payload externo incompatível com nível de erro', () => {
+    const error = vi.spyOn(logger, 'error').mockImplementation(() => undefined);
+    invokeErrorHandler(invalidLocationProviderPayload('payload'));
+    expect(error).toHaveBeenCalledWith('http_request_failed', expect.objectContaining({ code: 'LOCATION_PROVIDER_UNAVAILABLE', status: 503 }));
+  });
+
+  it('registra falhas internas inesperadas com nível de erro', () => {
+    const error = vi.spyOn(logger, 'error').mockImplementation(() => undefined);
+    invokeErrorHandler(new Error('bug'));
+    expect(error).toHaveBeenCalledWith('http_request_failed', expect.objectContaining({ code: 'INTERNAL_ERROR', status: 500 }));
+  });
+
+  it('responde 400 estável para corpo JSON malformado', () => {
+    vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const malformed = Object.assign(new SyntaxError('Unexpected token'), { body: '{' });
+    expect(invokeErrorHandler(malformed)).toEqual({ status: 400, body: { error: { code: 'INVALID_REQUEST', message: 'Corpo JSON inválido.' } } });
   });
 
   it('delegates errors after the response headers were sent', () => {

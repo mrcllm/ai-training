@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-11T18:41:28.205Z",
+  "environment": "Playwright Chromium; backend local e Open-Meteo real",
+  "samples": 10,
+  "successfulQueries": 10,
+  "p95Milliseconds": 919,
+  "withinThreeSecondsRate": 1,
+  "elapsedMilliseconds": [
+    919,
+    162,
+    116,
+    127,
+    117,
+    109,
+    125,
+    120,
+    109,
+    127
+  ]
+}

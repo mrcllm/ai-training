@@ -1,5 +1,5 @@
 export type LogContext = Record<string, string | number | boolean | undefined>;
-const SENSITIVE_KEYS = new Set(['city', 'query', 'coordinates', 'payload', 'body', 'stack', 'token', 'authorization', 'password']);
+const SENSITIVE_KEYS = new Set(['city', 'query', 'locationid', 'coordinates', 'payload', 'body', 'stack', 'token', 'authorization', 'password']);
 
 function sanitizeContext(context: LogContext): LogContext {
   return Object.fromEntries(Object.entries(context).filter(([key]) => !SENSITIVE_KEYS.has(key.toLowerCase())));

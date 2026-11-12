@@ -1,49 +1,57 @@
-import { Router } from 'express';
+import { Router, type RequestHandler } from 'express';
 import { AppError } from '../errors/app-error';
 import { logger } from '../observability/logger';
-import { normalizeCity } from '../services/normalize-city';
+import { normalizeLocationId } from '../services/normalize-location-id';
+import { responseAbortController } from './response-abort-controller';
 import type { WeatherResponse } from '../types/weather-response';
 
-type WeatherSearch = (city: string, signal: AbortSignal) => Promise<WeatherResponse>;
+type WeatherSearch = (locationId: number, signal: AbortSignal, requestId?: string) => Promise<WeatherResponse>;
 
 type WeatherRouteDependencies = {
   getCurrentWeather: WeatherSearch;
 };
 
-export function createWeatherRoute(dependencies: WeatherRouteDependencies): Router {
-  const router = Router();
-  router.get('/weather', async (request, response, next) => {
+type WeatherLogContext = {
+  requestId?: string;
+  route: string;
+  startedAt: number;
+};
+
+const OK_STATUS = 200;
+const INTERNAL_ERROR_STATUS = 500;
+
+function logWeatherFailure(error: unknown, context: WeatherLogContext): void {
+  const status = error instanceof AppError ? error.statusCode : INTERNAL_ERROR_STATUS;
+  const outcome = error instanceof AppError ? error.outcome : 'internal_error';
+  const level = error instanceof AppError ? error.logLevel : 'error';
+  logger[level]('weather_request_completed', {
+    requestId: context.requestId, route: context.route, status,
+    durationMs: Date.now() - context.startedAt, outcome,
+  });
+}
+
+function weatherHandler(dependencies: WeatherRouteDependencies): RequestHandler {
+  return async (request, response, next) => {
     const startedAt = Date.now();
+    const requestId = response.locals.requestId as string | undefined;
     response.setHeader('Cache-Control', 'no-store');
-    const controller = new AbortController();
-    response.once('close', () => {
-      if (!response.writableEnded) controller.abort();
-    });
+    const controller = responseAbortController(response);
     try {
-      const city = normalizeCity(request.query.city);
-      const weather = await dependencies.getCurrentWeather(city, controller.signal);
+      const locationId = normalizeLocationId(request.query.locationId);
+      const weather = await dependencies.getCurrentWeather(locationId, controller.signal, requestId);
       logger.info('weather_request_completed', {
-        requestId: response.locals.requestId as string | undefined,
-        route: request.path,
-        status: 200,
-        durationMs: Date.now() - startedAt,
-        outcome: 'success',
+        requestId, route: request.path, status: OK_STATUS, durationMs: Date.now() - startedAt, outcome: 'success',
       });
-      response.status(200).json(weather);
+      response.status(OK_STATUS).json(weather);
     } catch (error: unknown) {
-      if (!(error instanceof AppError)) {
-        next(error);
-        return;
-      }
-      logger.warn('weather_request_completed', {
-        requestId: response.locals.requestId as string | undefined,
-        route: request.path,
-        status: error.statusCode,
-        durationMs: Date.now() - startedAt,
-        outcome: error.code,
-      });
+      logWeatherFailure(error, { requestId, route: request.path, startedAt });
       next(error);
     }
-  });
+  };
+}
+
+export function createWeatherRoute(dependencies: WeatherRouteDependencies): Router {
+  const router = Router();
+  router.get('/weather', weatherHandler(dependencies));
   return router;
 }
