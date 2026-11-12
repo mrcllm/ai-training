@@ -1,0 +1,505 @@
+{
+  "executadoEm": "2026-11-11T17:48:55.935Z",
+  "base": "http://127.0.0.1:5111",
+  "resultados": [
+    {
+      "id": "QA-CA10-inicial",
+      "ca": "CA-10",
+      "status": "PASSOU",
+      "details": {
+        "evidencia": "screenshots/inicial-1280.png"
+      }
+    },
+    {
+      "id": "QA-CA05-rotulo-C",
+      "ca": "CA-05",
+      "status": "PASSOU",
+      "details": {
+        "celsius": {
+          "current": "18.4 °C",
+          "apparent": "17.2 °C",
+          "humidity": "61 %",
+          "wind": "12.3 km/h",
+          "heading": "Paris, Île-de-France, França",
+          "condition": "Predominantemente limpo",
+          "sourceLink": "https://open-meteo.com/",
+          "toggleLabel": "Mostrar em °F",
+          "status": "Temperaturas exibidas em Celsius"
+        },
+        "evidencia": "screenshots/sucesso-celsius-1280.png"
+      }
+    },
+    {
+      "id": "QA-CA12-nome-acessivel",
+      "ca": "CA-12",
+      "status": "PASSOU",
+      "details": {
+        "nomeEsperado": "Mostrar em °F (Fahrenheit)",
+        "ocorrencias": 1
+      }
+    },
+    {
+      "id": "QA-CA01",
+      "ca": "CA-01",
+      "status": "PASSOU",
+      "details": {
+        "fahrenheit": {
+          "current": "65.1 °F",
+          "apparent": "63 °F",
+          "humidity": "61 %",
+          "wind": "12.3 km/h",
+          "heading": "Paris, Île-de-France, França",
+          "condition": "Predominantemente limpo",
+          "sourceLink": "https://open-meteo.com/",
+          "toggleLabel": "Mostrar em °C",
+          "status": "Temperaturas exibidas em Fahrenheit"
+        },
+        "evidencia": "screenshots/sucesso-fahrenheit-1280.png"
+      }
+    },
+    {
+      "id": "QA-CA05-rotulo-F",
+      "ca": "CA-05",
+      "status": "PASSOU",
+      "details": {
+        "rotulo": "Mostrar em °C"
+      }
+    },
+    {
+      "id": "QA-CA06",
+      "ca": "CA-06",
+      "status": "PASSOU",
+      "details": {
+        "celsius": [
+          "61 %",
+          "12.3 km/h"
+        ],
+        "fahrenheit": [
+          "61 %",
+          "12.3 km/h"
+        ]
+      }
+    },
+    {
+      "id": "QA-CA12-status",
+      "ca": "CA-12",
+      "status": "PASSOU",
+      "details": {
+        "antes": "Temperaturas exibidas em Celsius",
+        "depois": "Temperaturas exibidas em Fahrenheit"
+      }
+    },
+    {
+      "id": "QA-UX-deslocamento",
+      "ca": "UX",
+      "status": "PASSOU",
+      "details": {
+        "maiorDeslocamentoPx": 0,
+        "larguraBotao": [
+          222.484375,
+          222.484375
+        ]
+      }
+    },
+    {
+      "id": "QA-CA07",
+      "ca": "CA-07",
+      "status": "PASSOU",
+      "details": {
+        "requisicoesAntes": 1,
+        "requisicoesDepois": 1,
+        "localidade": "Paris, Île-de-France, França",
+        "condicao": "Predominantemente limpo",
+        "fonte": "https://open-meteo.com/"
+      }
+    },
+    {
+      "id": "QA-CA02",
+      "ca": "CA-02",
+      "status": "PASSOU",
+      "details": {
+        "valores": [
+          "18.4 °C",
+          "17.2 °C"
+        ]
+      }
+    },
+    {
+      "id": "QA-CA04",
+      "ca": "CA-04",
+      "status": "PASSOU",
+      "details": {
+        "valores": [
+          "18.4 °C",
+          "17.2 °C"
+        ]
+      }
+    },
+    {
+      "id": "QA-CA14",
+      "ca": "CA-14",
+      "status": "PASSOU",
+      "details": {
+        "duracoesMs": [
+          3.8,
+          3.3,
+          3.5,
+          3.4,
+          3.6
+        ],
+        "unidadeFinal": "65.1 °F"
+      }
+    },
+    {
+      "id": "QA-CA10-carregando",
+      "ca": "CA-10",
+      "status": "PASSOU",
+      "details": {
+        "botoes": 0,
+        "status": "Consultando as condições atuais…"
+      }
+    },
+    {
+      "id": "QA-CA08",
+      "ca": "CA-08",
+      "status": "PASSOU",
+      "details": {
+        "nextSearch": {
+          "current": "65.1 °F",
+          "apparent": "63 °F",
+          "humidity": "61 %",
+          "wind": "12.3 km/h",
+          "heading": "Paris, Île-de-France, França",
+          "condition": "Predominantemente limpo",
+          "sourceLink": "https://open-meteo.com/",
+          "toggleLabel": "Mostrar em °C",
+          "status": "Temperaturas exibidas em Fahrenheit"
+        },
+        "evidencia": "screenshots/nova-busca-mantem-fahrenheit-1280.png"
+      }
+    },
+    {
+      "id": "QA-CA10-nao-encontrada",
+      "ca": "CA-10",
+      "status": "PASSOU",
+      "details": {
+        "botoes": 0,
+        "alerta": "Cidade não encontrada. Revise o nome e tente novamente.",
+        "evidencia": "screenshots/erro-nao-encontrada-1280.png"
+      }
+    },
+    {
+      "id": "QA-CA10-indisponivel",
+      "ca": "CA-10",
+      "status": "PASSOU",
+      "details": {
+        "botoes": 0,
+        "alerta": "Não foi possível consultar o clima agora. Tente novamente em instantes.",
+        "evidencia": "screenshots/erro-indisponivel-1280.png"
+      }
+    },
+    {
+      "id": "QA-CA09",
+      "ca": "CA-09",
+      "status": "PASSOU",
+      "details": {
+        "reloaded": {
+          "current": "18.4 °C",
+          "apparent": "17.2 °C",
+          "humidity": "61 %",
+          "wind": "12.3 km/h",
+          "heading": "Paris, Île-de-France, França",
+          "condition": "Predominantemente limpo",
+          "sourceLink": "https://open-meteo.com/",
+          "toggleLabel": "Mostrar em °F",
+          "status": "Temperaturas exibidas em Celsius"
+        },
+        "evidencia": "screenshots/apos-recarregar-celsius-1280.png"
+      }
+    },
+    {
+      "id": "QA-CA11",
+      "ca": "CA-11",
+      "status": "PASSOU",
+      "details": {
+        "focoAposResultado": {
+          "tag": "BUTTON",
+          "text": "Mostrar em °F (Fahrenheit)",
+          "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(244, 201, 93) 0px 0px 0px 6px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+        },
+        "aposEnter": {
+          "card": {
+            "current": "65.1 °F",
+            "apparent": "63 °F",
+            "humidity": "61 %",
+            "wind": "12.3 km/h",
+            "heading": "Paris, Île-de-France, França",
+            "condition": "Predominantemente limpo",
+            "sourceLink": "https://open-meteo.com/",
+            "toggleLabel": "Mostrar em °C",
+            "status": "Temperaturas exibidas em Fahrenheit"
+          },
+          "focus": {
+            "tag": "BUTTON",
+            "text": "Mostrar em °C (Celsius)",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(244, 201, 93) 0px 0px 0px 6px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+          }
+        },
+        "aposEspaco": {
+          "card": {
+            "current": "18.4 °C",
+            "apparent": "17.2 °C",
+            "humidity": "61 %",
+            "wind": "12.3 km/h",
+            "heading": "Paris, Île-de-France, França",
+            "condition": "Predominantemente limpo",
+            "sourceLink": "https://open-meteo.com/",
+            "toggleLabel": "Mostrar em °F",
+            "status": "Temperaturas exibidas em Celsius"
+          },
+          "focus": {
+            "tag": "BUTTON",
+            "text": "Mostrar em °F (Fahrenheit)",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(244, 201, 93) 0px 0px 0px 6px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+          }
+        },
+        "aposEsc": "18.4 °C",
+        "proximoFoco": "Open-Meteo",
+        "evidencia": "screenshots/foco-teclado-botao-1280.png"
+      }
+    },
+    {
+      "id": "QA-CA12-regiao-live",
+      "ca": "CA-12",
+      "status": "PASSOU",
+      "details": {
+        "sectionAriaLive": "polite",
+        "statusRole": "status",
+        "statusText": "Temperaturas exibidas em Fahrenheit",
+        "statusVisualmenteOculto": true,
+        "evidencia": "aria-snapshot-resultado-fahrenheit.txt"
+      }
+    },
+    {
+      "id": "QA-A11Y-tipografia-imagens",
+      "ca": "A11Y",
+      "status": "PASSOU",
+      "details": {
+        "menorFontePx": 12,
+        "elementosMenores": [
+          {
+            "text": "Temperatura atual",
+            "size": 12
+          }
+        ],
+        "fonteBotaoPx": 14,
+        "imagensSemAlt": 0,
+        "svgsSemAriaHidden": 0
+      }
+    },
+    {
+      "id": "QA-CA13-360",
+      "ca": "CA-13",
+      "status": "PASSOU",
+      "details": {
+        "viewport": {
+          "width": 360,
+          "height": 800
+        },
+        "botao": {
+          "x": 41,
+          "y": 378,
+          "width": 222.484375,
+          "height": 44
+        },
+        "rolagemHorizontal": false,
+        "evidencias": [
+          "screenshots/inicial-360.png",
+          "screenshots/sucesso-celsius-360.png",
+          "screenshots/sucesso-fahrenheit-360.png",
+          "screenshots/erro-nao-encontrada-360.png"
+        ]
+      }
+    },
+    {
+      "id": "QA-CA13-768",
+      "ca": "CA-13",
+      "status": "PASSOU",
+      "details": {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "botao": {
+          "x": 77,
+          "y": 641,
+          "width": 222.484375,
+          "height": 44
+        },
+        "rolagemHorizontal": false,
+        "evidencias": [
+          "screenshots/sucesso-fahrenheit-768.png"
+        ]
+      }
+    },
+    {
+      "id": "QA-CA13-1024",
+      "ca": "CA-13",
+      "status": "PASSOU",
+      "details": {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "botao": {
+          "x": 477,
+          "y": 597,
+          "width": 222.484375,
+          "height": 44
+        },
+        "rolagemHorizontal": false,
+        "evidencias": [
+          "screenshots/sucesso-fahrenheit-1024.png"
+        ]
+      }
+    },
+    {
+      "id": "QA-CA03",
+      "ca": "CA-03",
+      "status": "PASSOU",
+      "details": {
+        "observado": [
+          {
+            "celsius": [
+              0,
+              -17.8
+            ],
+            "esperado": [
+              "32 °F",
+              "0 °F"
+            ],
+            "exibido": [
+              "32 °F",
+              "0 °F"
+            ],
+            "evidencia": "screenshots/limite-menos-17-8-exibe-0-fahrenheit-1280.png"
+          },
+          {
+            "celsius": [
+              100,
+              37
+            ],
+            "esperado": [
+              "212 °F",
+              "98.6 °F"
+            ],
+            "exibido": [
+              "212 °F",
+              "98.6 °F"
+            ]
+          },
+          {
+            "celsius": [
+              -40,
+              22.5
+            ],
+            "esperado": [
+              "-40 °F",
+              "72.5 °F"
+            ],
+            "exibido": [
+              "-40 °F",
+              "72.5 °F"
+            ]
+          },
+          {
+            "celsius": [
+              -3.2,
+              25
+            ],
+            "esperado": [
+              "26.2 °F",
+              "77 °F"
+            ],
+            "exibido": [
+              "26.2 °F",
+              "77 °F"
+            ]
+          },
+          {
+            "celsius": [
+              27,
+              -3.2
+            ],
+            "esperado": [
+              "80.6 °F",
+              "26.2 °F"
+            ],
+            "exibido": [
+              "80.6 °F",
+              "26.2 °F"
+            ]
+          }
+        ],
+        "semMenosZero": true
+      }
+    }
+  ],
+  "axe": [
+    {
+      "label": "inicial-1280 (página)",
+      "passes": 18,
+      "incomplete": [
+        "color-contrast"
+      ],
+      "violations": []
+    },
+    {
+      "label": "sucesso-celsius-1280 (página)",
+      "passes": 26,
+      "incomplete": [
+        "color-contrast"
+      ],
+      "violations": []
+    },
+    {
+      "label": "sucesso-fahrenheit-1280 (página)",
+      "passes": 26,
+      "incomplete": [
+        "color-contrast"
+      ],
+      "violations": []
+    },
+    {
+      "label": "erro-nao-encontrada-1280 (página)",
+      "passes": 21,
+      "incomplete": [
+        "color-contrast"
+      ],
+      "violations": []
+    },
+    {
+      "label": "sucesso-fahrenheit-360 (página)",
+      "passes": 26,
+      "incomplete": [
+        "color-contrast"
+      ],
+      "violations": []
+    }
+  ],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "errosDePagina": []
+}

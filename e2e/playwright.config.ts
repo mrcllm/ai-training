@@ -1,13 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
+import { BACKEND_PORT, BACKEND_URL, FRONTEND_PORT, MOCK_PORT } from './test-ports';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const MOCK_PORT = 3200;
-const BACKEND_PORT = 3001;
-const FRONTEND_PORT = 5100;
 const USE_REAL_PROVIDER = process.env.RUN_REAL_SMOKE === '1';
 const mockServer = {
-  command: 'node mock-open-meteo.mjs', cwd: ROOT + '/e2e',
+  command: `MOCK_METEO_PORT=${MOCK_PORT} node mock-open-meteo.mjs`, cwd: ROOT + '/e2e',
   url: `http://127.0.0.1:${MOCK_PORT}/__metrics`, reuseExistingServer: false,
 };
 const backendEnvironment = USE_REAL_PROVIDER
@@ -23,7 +21,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     ...(USE_REAL_PROVIDER ? [] : [mockServer]),
-    { command: `${backendEnvironment} npm run dev`, cwd: ROOT + '/backend', url: `http://127.0.0.1:${BACKEND_PORT}/health`, reuseExistingServer: false },
-    { command: `VITE_API_BASE_URL=http://127.0.0.1:${BACKEND_PORT} npm run dev -- --host 127.0.0.1 --port ${FRONTEND_PORT}`, cwd: ROOT + '/frontend', url: `http://127.0.0.1:${FRONTEND_PORT}`, reuseExistingServer: false },
+    { command: `${backendEnvironment} npm run dev`, cwd: ROOT + '/backend', url: `${BACKEND_URL}/health`, reuseExistingServer: false },
+    { command: `VITE_API_BASE_URL=${BACKEND_URL} npm run dev -- --host 127.0.0.1 --port ${FRONTEND_PORT}`, cwd: ROOT + '/frontend', url: `http://127.0.0.1:${FRONTEND_PORT}`, reuseExistingServer: false },
   ],
 });

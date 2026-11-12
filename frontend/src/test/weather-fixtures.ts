@@ -12,3 +12,9 @@ export const weatherResponse: WeatherResponse = {
   units: { temperature: '°C', apparentTemperature: '°C', humidity: '%', windSpeed: 'km/h' },
   source: { name: 'Open-Meteo', url: 'https://open-meteo.com/' },
 };
+
+export const portoWeatherResponse: WeatherResponse = {
+  ...weatherResponse,
+  location: { name: 'Porto', admin1: 'Porto', country: 'Portugal' },
+  current: { ...weatherResponse.current, temperature: 10, apparentTemperature: 8 },
+};

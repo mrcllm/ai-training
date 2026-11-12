@@ -1,0 +1,8 @@
+const DEFAULT_MOCK_PORT = 3200;
+const DEFAULT_BACKEND_PORT = 3001;
+const DEFAULT_FRONTEND_PORT = 5100;
+
+export const MOCK_PORT = Number(process.env.E2E_MOCK_PORT ?? DEFAULT_MOCK_PORT);
+export const BACKEND_PORT = Number(process.env.E2E_BACKEND_PORT ?? DEFAULT_BACKEND_PORT);
+export const FRONTEND_PORT = Number(process.env.E2E_FRONTEND_PORT ?? DEFAULT_FRONTEND_PORT);
+export const BACKEND_URL = `http://127.0.0.1:${BACKEND_PORT}`;

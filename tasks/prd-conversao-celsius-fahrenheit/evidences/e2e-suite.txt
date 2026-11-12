@@ -1,0 +1,26 @@
+
+> weather-panel-e2e@1.0.0 test
+> playwright test
+
+
+Running 16 tests using 4 workers
+
+  ✓   2 [chromium] › weather-panel-accessibility.spec.ts:3:1 › E2E-06 permite concluir a busca e acessar a fonte pelo teclado (3.0s)
+  ✓   4 [chromium] › temperature-unit.spec.ts:14:1 › E2E-01 alterna para °F e mantém a escolha na busca seguinte (3.9s)
+  ✓   5 [chromium] › weather-panel-accessibility.spec.ts:21:1 › E2E-07 mantém controles utilizáveis sem rolagem horizontal (2.0s)
+  ✓   3 [chromium] › qa-visual.spec.ts:6:1 › captura estados visuais principais em mobile e desktop (5.6s)
+  ✓   6 [chromium] › temperature-unit.spec.ts:25:1 › E2E-02 recarregar a página volta para Celsius (2.9s)
+  ✓   7 [chromium] › weather-panel.spec.ts:3:1 › E2E-01 apresenta a primeira localidade e todos os dados do clima (1.6s)
+  ✓   9 [chromium] › weather-panel.spec.ts:17:1 › E2E-02 mantém as chamadas externas no backend (1.1s)
+  ✓   8 [chromium] › temperature-unit.spec.ts:36:1 › E2E-03 mantém o botão utilizável em tela de 360 px (1.3s)
+  ✓  10 [chromium] › weather-panel.spec.ts:28:1 › E2E-03 orienta entrada inválida sem enviar busca (847ms)
+  ✓  11 [chromium] › temperature-unit.spec.ts:50:1 › E2E-04 exibe a nova unidade em até 100 ms (1.4s)
+  ✓   1 [chromium] › real-performance.spec.ts:7:1 › E2E-08 comprova latência controlada em pelo menos 95% das buscas (9.7s)
+  -  14 [chromium] › real-performance.spec.ts:32:1 › registra smoke externo de cidades fixas sem bloquear por latência do provedor
+  ✓  12 [chromium] › weather-panel.spec.ts:39:1 › E2E-04 recupera de localidade ausente e falha externa (1.5s)
+  ✓  13 [chromium] › temperature-unit.spec.ts:58:1 › E2E-06 mantém o botão alinhado à caixa da temperatura quando o título quebra de linha (958ms)
+  ✓  15 [chromium] › weather-panel.spec.ts:57:1 › E2E-05 bloqueia novos envios durante carregamento (1.8s)
+  ✓  16 [chromium] › temperature-unit.spec.ts:67:1 › E2E-05 resultado em °F sem violações críticas ou sérias de acessibilidade (1.8s)
+
+  1 skipped
+  15 passed (18.4s)

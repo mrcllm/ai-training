@@ -1,0 +1,37 @@
+
+> frontend@0.0.0 test:coverage
+> vitest run --coverage
+
+
+ RUN  v5.1.0 /Users/mrcll/ai-curso-atualizado/formacao-inteligencia-artificial/spec-driven-development/template/frontend
+      Coverage enabled with v8
+
+
+ Test Files  10 passed (10)
+      Tests  48 passed (48)
+   Start at  17:49:22
+   Duration  7.18s (environment 54%, tests 18%, setup 14%, import 8%, worker 3%, transform 2%)
+
+Environment  jsdom was created 10 times · 20.81s total, 54% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   95.61 |    88.42 |   97.22 |     100 |                   
+ components        |   96.96 |    93.75 |     100 |     100 |                   
+  ...earchForm.tsx |   94.73 |    91.66 |     100 |     100 | 14                
+ hooks             |     100 |       85 |     100 |     100 |                   
+  ...therSearch.ts |     100 |       85 |     100 |     100 | 31,34-36          
+ services          |   85.71 |    86.27 |   88.88 |     100 |                   
+  ...er-service.ts |   85.71 |    86.27 |   88.88 |     100 | 23-29,40,47-58    
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 95.61% ( 109/114 )
+Branches     : 88.42% ( 84/95 )
+Functions    : 97.22% ( 35/36 )
+Lines        : 100% ( 97/97 )
+================================================================================

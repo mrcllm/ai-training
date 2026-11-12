@@ -2,10 +2,12 @@ import { CloudSun, Compass } from 'lucide-react';
 import { WeatherFeedback } from '../components/WeatherFeedback';
 import { WeatherResult } from '../components/WeatherResult';
 import { WeatherSearchForm } from '../components/WeatherSearchForm';
+import { useTemperatureUnit } from '../hooks/useTemperatureUnit';
 import { useWeatherSearch } from '../hooks/useWeatherSearch';
 
 export function WeatherView() {
   const { state, search } = useWeatherSearch();
+  const { unit, toggleUnit } = useTemperatureUnit();
   const isLoading = state.status === 'loading';
   const error = state.status === 'error' ? state.error : undefined;
   return <main className="min-h-screen bg-[#edf3f4] text-slate-950">
@@ -19,7 +21,7 @@ export function WeatherView() {
             <WeatherSearchForm isLoading={isLoading} onSearch={search} />
             <div className="mt-4 min-h-6"><WeatherFeedback isLoading={isLoading} error={error} /></div>
           </div>
-          {state.status === 'success' && <div className="mt-6"><WeatherResult weather={state.data} /></div>}
+          {state.status === 'success' && <div className="mt-6"><WeatherResult weather={state.data} temperatureUnit={unit} onToggleTemperatureUnit={toggleUnit} /></div>}
         </div>
       </section>
     </div>

@@ -1,0 +1,65 @@
+const q = require('./qa-browser.cjs');
+const { record, search, toggle, readCard, shot, RESULT, PARIS } = q;
+
+const DESKTOP = { width: 1280, height: 900 };
+
+async function desktopFlow(browser) {
+  const { context, page } = await q.newPage(browser, DESKTOP);
+  record('QA-CA10-inicial', 'CA-10', (await toggle(page).count()) === 0, { evidencia: await shot(page, 'inicial-1280') });
+  await q.runAxe(page, 'inicial-1280 (página)');
+  await search(page, 'Paris');
+  const celsius = await readCard(page);
+  record('QA-CA05-rotulo-C', 'CA-05', celsius.toggleLabel === 'Mostrar em °F', { celsius, evidencia: await shot(page, 'sucesso-celsius-1280') });
+  const exactName = await page.getByRole('button', { name: 'Mostrar em °F (Fahrenheit)', exact: true }).count();
+  record('QA-CA12-nome-acessivel', 'CA-12', exactName === 1, { nomeEsperado: 'Mostrar em °F (Fahrenheit)', ocorrencias: exactName });
+  await q.runAxe(page, 'sucesso-celsius-1280 (página)');
+  const boxesBefore = await q.layoutBoxes(page);
+  const requestsBefore = q.getWeatherRequests();
+  await toggle(page).click();
+  const fahrenheit = await readCard(page);
+  const boxesAfter = await q.layoutBoxes(page);
+  record('QA-CA01', 'CA-01', fahrenheit.current === '65.1 °F' && fahrenheit.apparent === '63 °F', { fahrenheit, evidencia: await shot(page, 'sucesso-fahrenheit-1280') });
+  record('QA-CA05-rotulo-F', 'CA-05', fahrenheit.toggleLabel === 'Mostrar em °C', { rotulo: fahrenheit.toggleLabel });
+  record('QA-CA06', 'CA-06', fahrenheit.humidity === celsius.humidity && fahrenheit.wind === celsius.wind, { celsius: [celsius.humidity, celsius.wind], fahrenheit: [fahrenheit.humidity, fahrenheit.wind] });
+  record('QA-CA12-status', 'CA-12', fahrenheit.status === 'Temperaturas exibidas em Fahrenheit' && celsius.status === 'Temperaturas exibidas em Celsius', { antes: celsius.status, depois: fahrenheit.status });
+  const shift = Math.max(...['heading', 'condition', 'metrics'].map((key) => Math.abs(boxesAfter[key].y - boxesBefore[key].y)), Math.abs(boxesAfter.section.h - boxesBefore.section.h));
+  record('QA-UX-deslocamento', 'UX', shift <= 1 && Math.abs(boxesAfter.toggle.w - boxesBefore.toggle.w) <= 1, { maiorDeslocamentoPx: shift, larguraBotao: [boxesBefore.toggle.w, boxesAfter.toggle.w] });
+  await q.runAxe(page, 'sucesso-fahrenheit-1280 (página)');
+  await toggle(page).click();
+  await toggle(page).click();
+  const unchanged = await readCard(page);
+  const sameContext = unchanged.heading === celsius.heading && unchanged.condition === celsius.condition && unchanged.sourceLink === celsius.sourceLink;
+  record('QA-CA07', 'CA-07', q.getWeatherRequests() === requestsBefore && sameContext, { requisicoesAntes: requestsBefore, requisicoesDepois: q.getWeatherRequests(), localidade: unchanged.heading, condicao: unchanged.condition, fonte: unchanged.sourceLink });
+  await toggle(page).click();
+  const back = await readCard(page);
+  record('QA-CA02', 'CA-02', back.current === '18.4 °C' && back.apparent === '17.2 °C', { valores: [back.current, back.apparent] });
+  for (let index = 0; index < 10; index += 1) await toggle(page).click();
+  const afterTen = await readCard(page);
+  record('QA-CA04', 'CA-04', afterTen.current === '18.4 °C' && afterTen.apparent === '17.2 °C', { valores: [afterTen.current, afterTen.apparent] });
+  const durations = [];
+  for (let index = 0; index < 5; index += 1) durations.push(await q.measureToggle(page));
+  record('QA-CA14', 'CA-14', Math.max(...durations) <= 100, { duracoesMs: durations.map((d) => Number(d.toFixed(2))), unidadeFinal: (await readCard(page)).current });
+  await page.getByRole('textbox', { name: 'Cidade' }).fill('Lento');
+  const slowResponse = page.waitForResponse((r) => r.url().includes('/weather?'));
+  await page.getByRole('button', { name: 'Consultar clima' }).click();
+  const duringLoading = { botoes: await toggle(page).count(), status: await page.getByRole('status').first().textContent() };
+  await slowResponse;
+  await page.locator(RESULT).waitFor();
+  const nextSearch = await readCard(page);
+  record('QA-CA10-carregando', 'CA-10', duringLoading.botoes === 0, duringLoading);
+  record('QA-CA08', 'CA-08', nextSearch.current === '65.1 °F' && nextSearch.toggleLabel === 'Mostrar em °C', { nextSearch, evidencia: await shot(page, 'nova-busca-mantem-fahrenheit-1280') });
+  await search(page, 'cidade inexistente', 'alert');
+  const notFound = { botoes: await toggle(page).count(), alerta: await page.getByRole('alert').textContent(), evidencia: await shot(page, 'erro-nao-encontrada-1280') };
+  record('QA-CA10-nao-encontrada', 'CA-10', notFound.botoes === 0, notFound);
+  await q.runAxe(page, 'erro-nao-encontrada-1280 (página)');
+  await search(page, 'falha externa', 'alert');
+  const unavailable = { botoes: await toggle(page).count(), alerta: await page.getByRole('alert').textContent(), evidencia: await shot(page, 'erro-indisponivel-1280') };
+  record('QA-CA10-indisponivel', 'CA-10', unavailable.botoes === 0, unavailable);
+  await page.reload();
+  await search(page, 'Paris');
+  const reloaded = await readCard(page);
+  record('QA-CA09', 'CA-09', reloaded.current === '18.4 °C' && reloaded.toggleLabel === 'Mostrar em °F', { reloaded, evidencia: await shot(page, 'apos-recarregar-celsius-1280') });
+  await context.close();
+}
+
+module.exports = { desktopFlow, DESKTOP };

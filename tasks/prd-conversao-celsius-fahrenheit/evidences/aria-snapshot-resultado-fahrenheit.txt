@@ -1,0 +1,18 @@
+- region "Paris, Île-de-France, França":
+  - paragraph: Localidade encontrada
+  - heading "Paris, Île-de-France, França" [level=2]
+  - text: 65.1 °F Temperatura atual
+  - button "Mostrar em °C (Celsius)"
+  - status: Temperaturas exibidas em Fahrenheit
+  - paragraph: Predominantemente limpo
+  - term: Sensação térmica
+  - definition: 63 °F
+  - term: Umidade relativa
+  - definition: 61 %
+  - term: Velocidade do vento
+  - definition: 12.3 km/h
+  - paragraph:
+    - text: Dados por
+    - link "Open-Meteo":
+      - /url: https://open-meteo.com/
+    - text: .

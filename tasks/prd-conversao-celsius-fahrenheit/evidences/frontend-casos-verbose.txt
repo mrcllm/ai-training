@@ -1,0 +1,50 @@
+ ✓ src/hooks/useWeatherSearch.test.ts > useWeatherSearch > mostra o resultado da busca concluída 140ms
+ ✓ src/hooks/useWeatherSearch.test.ts > useWeatherSearch > bloqueia envio duplicado enquanto aguarda resposta 127ms
+ ✓ src/hooks/useWeatherSearch.test.ts > useWeatherSearch > remove resultado anterior quando uma nova busca falha 66ms
+ ✓ src/hooks/useWeatherSearch.test.ts > useWeatherSearch > cancela a requisição quando o consumidor desmonta 8ms
+ ✓ src/components/TemperatureUnitToggle.test.tsx > TemperatureUnitToggle > TU-10 em Celsius oferece a troca para Fahrenheit 339ms
+ ✓ src/components/TemperatureUnitToggle.test.tsx > TemperatureUnitToggle > TU-11 em Fahrenheit oferece a troca para Celsius 24ms
+ ✓ src/components/TemperatureUnitToggle.test.tsx > TemperatureUnitToggle > TU-12 chama onToggle uma vez por clique 38ms
+ ✓ src/components/TemperatureUnitToggle.test.tsx > TemperatureUnitToggle > TU-13 informa por status a unidade em uso 21ms
+ ✓ src/components/TemperatureUnitToggle.test.tsx > TemperatureUnitToggle > TU-14 tem nome acessível que começa pelo rótulo visível 78ms
+ ✓ src/components/WeatherSearchForm.test.tsx > WeatherSearchForm > associa orientação de validação ao campo e não envia busca curta 489ms
+ ✓ src/components/WeatherSearchForm.test.tsx > WeatherSearchForm > submete uma busca válida pelo teclado 103ms
+ ✓ src/services/weather-service.test.ts > fetchWeather > obtém o resultado somente do backend configurado 252ms
+ ✓ src/services/weather-service.test.ts > fetchWeather > preserva o significado público de cidade não encontrada 30ms
+ ✓ src/services/weather-service.test.ts > fetchWeather > converte um envelope de sucesso inválido em erro temporário 44ms
+ ✓ src/components/WeatherResult.test.tsx > WeatherResult > exibe localidade, medições, unidades e atribuição 322ms
+ ✓ src/components/WeatherResult.test.tsx > WeatherResult > TU-15 em °F exibe a temperatura atual convertida 28ms
+ ✓ src/components/WeatherResult.test.tsx > WeatherResult > TU-16 em °F exibe a sensação térmica convertida 24ms
+ ✓ src/components/WeatherResult.test.tsx > WeatherResult > TU-17 em °F mantém umidade e vento 36ms
+ ✓ src/components/WeatherResult.test.tsx > WeatherResult > TU-18 em °F mantém localidade, condição e atribuição 28ms
+ ✓ src/components/WeatherResult.test.tsx > WeatherResult > TU-19 em °C exibe os valores originais das temperaturas 10ms
+ ✓ src/components/WeatherResult.test.tsx > WeatherResult > TU-20 encaminha o acionamento do botão de alternância 67ms
+ ✓ src/views/WeatherView.test.tsx > WeatherView > percorre validação, carregamento e sucesso usando o backend 594ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-01 alternar após uma busca exibe as temperaturas em °F 571ms
+ ✓ src/views/WeatherView.test.tsx > WeatherView > remove resultado anterior ao falhar uma busca seguinte 252ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-02 alternar não faz nova requisição ao backend 223ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-03 alternar atualiza os valores sem estado de carregamento 103ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-04 dez alternâncias restauram exatamente os valores originais 211ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-05 a unidade escolhida vale para a busca seguinte 298ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-06 sem resultado não há botão de alternância 26ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-07 busca com erro não exibe o botão de alternância 111ms
+ ✓ src/hooks/useTemperatureUnit.test.ts > useTemperatureUnit > TU-07 começa em Celsius 30ms
+ ✓ src/hooks/useTemperatureUnit.test.ts > useTemperatureUnit > TU-08 alterna para Fahrenheit e volta para Celsius 6ms
+ ✓ src/hooks/useTemperatureUnit.test.ts > useTemperatureUnit > TU-09 aplica duas alternâncias disparadas no mesmo evento 5ms
+ ✓ src/components/WeatherFeedback.test.tsx > WeatherFeedback > anuncia consulta em andamento como status 109ms
+ ✓ src/components/WeatherFeedback.test.tsx > WeatherFeedback > apresenta erro recuperável em região de alerta 6ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-08/TI-09 Enter alterna a unidade e mantém o foco no botão 106ms
+ ✓ src/views/WeatherView.temperature-unit.test.tsx > WeatherView com alternância de unidade de temperatura > TI-08/TI-09 Espaço alterna a unidade e mantém o foco no botão 100ms
+ ✓ src/lib/temperature.test.ts > convertCelsiusToFahrenheit > TU-01 converte 0 °C em 32 °F conforme a tabela de referência 3ms
+ ✓ src/lib/temperature.test.ts > convertCelsiusToFahrenheit > TU-01 converte 100 °C em 212 °F conforme a tabela de referência 0ms
+ ✓ src/lib/temperature.test.ts > convertCelsiusToFahrenheit > TU-01 converte -40 °C em -40 °F conforme a tabela de referência 0ms
+ ✓ src/lib/temperature.test.ts > convertCelsiusToFahrenheit > TU-01 converte 22.5 °C em 72.5 °F conforme a tabela de referência 0ms
+ ✓ src/lib/temperature.test.ts > convertCelsiusToFahrenheit > TU-01 converte -3.2 °C em 26.2 °F conforme a tabela de referência 0ms
+ ✓ src/lib/temperature.test.ts > convertCelsiusToFahrenheit > TU-01 converte 37 °C em 98.6 °F conforme a tabela de referência 0ms
+ ✓ src/lib/temperature.test.ts > convertCelsiusToFahrenheit > TU-02 normaliza zero negativo para zero 0ms
+ ✓ src/lib/temperature.test.ts > formatTemperature > TU-03 formata o valor convertido com o símbolo °F 1ms
+ ✓ src/lib/temperature.test.ts > formatTemperature > TU-04 preserva o valor original em °C sem arredondar 0ms
+ ✓ src/lib/temperature.test.ts > formatTemperature > TU-05 nunca exibe "-0" em °F 0ms
+ ✓ src/lib/temperature.test.ts > getNextTemperatureUnit > TU-06 alterna entre Celsius e Fahrenheit 0ms
+ Test Files  10 passed (10)
+      Tests  48 passed (48)

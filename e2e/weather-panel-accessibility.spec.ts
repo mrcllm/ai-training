@@ -12,6 +12,8 @@ test('E2E-06 permite concluir a busca e acessar a fonte pelo teclado', async ({ 
   await expect(result).toBeVisible();
   await expect(result).toHaveAttribute('id', 'weather-result-title');
   await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: /^Mostrar em °F/ })).toBeFocused();
+  await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: /Open-Meteo/ })).toBeFocused();
   await expect(page.getByRole('link', { name: /Open-Meteo/ })).toHaveAttribute('href', 'https://open-meteo.com/');
 });

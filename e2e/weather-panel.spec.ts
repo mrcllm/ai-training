@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { BACKEND_URL } from './test-ports';
 
 test('E2E-01 apresenta a primeira localidade e todos os dados do clima', async ({ page }) => {
   await page.goto('/');
@@ -21,7 +22,7 @@ test('E2E-02 mantém as chamadas externas no backend', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Cidade' }).fill('Paris');
   await page.getByRole('button', { name: 'Consultar clima' }).click();
   await expect(page.getByRole('heading', { name: 'Paris, Île-de-France, França' })).toBeVisible();
-  expect(requests.some((url) => url.includes('127.0.0.1:3001/weather'))).toBe(true);
+  expect(requests.some((url) => url.startsWith(`${BACKEND_URL}/weather`))).toBe(true);
   expect(requests.some((url) => url.includes('open-meteo.com'))).toBe(false);
 });
 
