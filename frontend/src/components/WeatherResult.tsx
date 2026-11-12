@@ -1,6 +1,6 @@
 import { Droplets, MapPin, Thermometer, Wind } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { formatTemperature } from '../lib/temperature';
+import { formatTemperature } from '../services/temperature';
 import type { TemperatureUnit } from '../types/temperature-unit';
 import type { WeatherResponse } from '../types/weather-response';
 import { SourceAttribution } from './SourceAttribution';

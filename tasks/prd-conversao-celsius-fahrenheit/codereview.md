@@ -3,11 +3,11 @@
 ## Resumo
 - Data: 12/11/2026
 - Branch: `task-2` (worktree `spec-driven-development/task-2`, alterações ainda não commitadas)
-- Status: APROVADO COM RESSALVAS
+- Status: APROVADO
 
 **Escopo revisado:** os 18 arquivos da funcionalidade em `task-2` (tarefas 1.0 e 2.0, incluindo a correção do BUG-01 do QA), além das dependências de teste adicionadas:
 
-- código: `types/temperature-unit.ts`, `types/use-temperature-unit-result.ts`, `lib/temperature.ts`, `hooks/useTemperatureUnit.ts`, `components/TemperatureUnitToggle.tsx`, `components/TemperatureHighlight.tsx`, `components/WeatherResult.tsx` e `views/WeatherView.tsx`;
+- código: `types/temperature-unit.ts`, `types/use-temperature-unit-result.ts`, `services/temperature.ts`, `hooks/useTemperatureUnit.ts`, `components/TemperatureUnitToggle.tsx`, `components/TemperatureHighlight.tsx`, `components/WeatherResult.tsx` e `views/WeatherView.tsx`;
 - testes de unidade e de integração, `test/weather-view-helpers.ts` e `test/weather-fixtures.ts`;
 - `e2e/temperature-unit.spec.ts`, `e2e/temperature-unit-helpers.ts` e o ajuste no E2E-06 de `e2e/weather-panel-accessibility.spec.ts`;
 - `frontend/package.json` e `e2e/package.json`, com os lock files.
@@ -27,9 +27,9 @@
 | `javascript-typescript.md`: sem ternários aninhados; `Record` para mapas | OK | `NEXT_TEMPERATURE_UNIT` e `TEMPERATURE_UNIT_NAMES` usam `Record<TemperatureUnit, …>`. Só há um ternário simples em `formatTemperature`. |
 | `javascript-typescript.md`: imutabilidade | OK | O estado é atualizado com atualizador funcional; nenhuma coleção é mutada. |
 | `node.md`: dependências com npm e lock files versionados | OK | `msw` e `@testing-library/user-event` (frontend) e `@axe-core/playwright` (e2e) instalados com `npm install --save-dev`; `package-lock.json` de cada app atualizado. |
-| `node.md`: sem referências circulares | OK | `WeatherView → useTemperatureUnit → lib/temperature → types`; `WeatherResult → TemperatureHighlight → TemperatureUnitToggle → lib/temperature`. Sem ciclos. |
+| `node.md`: sem referências circulares | OK | `WeatherView → useTemperatureUnit → services/temperature → types`; `WeatherResult → TemperatureHighlight → TemperatureUnitToggle → services/temperature`. Sem ciclos. |
 | `folder-structure.md`: um tipo por arquivo, hooks, components, views, testes ao lado do código, E2E em `e2e/` | OK | Estrutura respeitada. |
-| `folder-structure.md`: pastas do frontend | OK com ressalva | `frontend/src/lib/` não está na lista de pastas da rule. A TechSpec justifica dizendo que a pasta já existia no `template`, o que não vale para `task-2`, onde ela foi criada agora. Ver problema P-01. |
+| `folder-structure.md`: pastas do frontend | OK | As funções de conversão ficam em `services/`, pasta prevista para transformação de respostas da API. A pasta `lib/`, que não consta na rule, foi eliminada (P-01). |
 | `tests.md`: Vitest, Playwright, FIRST, AAA, cobertura ≥ 80% | OK | Cobertura de 94,44% em statements, 90,52% em branches, 97,14% em funções e 100% em linhas. Sem relógio nem dados aleatórios; msw reiniciado após cada teste. |
 | `tests.md`: um conceito por teste | OK | O caso `TI-08/TI-09` tem duas asserções (valor convertido e foco), mas as duas formam o mesmo critério (CA-11). |
 | Skill `react`: componentes pequenos, props explícitas, sem `useEffect`/`useMemo` desnecessários | OK | Sem spread de props; o valor convertido é derivado na renderização; estado único no `WeatherView`. |
@@ -40,7 +40,7 @@
 | Decisão Técnica | Implementado | Observações |
 |-----------------|--------------|-------------|
 | Conversão somente no frontend, a partir do valor original em °C | SIM | O backend pede `temperature_unit=celsius`; `isWeatherResponse` rejeita respostas que não estejam em `°C`. |
-| `lib/temperature.ts` com `DEFAULT_TEMPERATURE_UNIT`, `convertCelsiusToFahrenheit`, `formatTemperature` e `getNextTemperatureUnit` | SIM | Assinaturas idênticas às da TechSpec. |
+| `services/temperature.ts` com `DEFAULT_TEMPERATURE_UNIT`, `convertCelsiusToFahrenheit`, `formatTemperature` e `getNextTemperatureUnit` | SIM | Assinaturas idênticas às da TechSpec. |
 | Arredondamento `Math.round(valor × 10) / 10` e normalização de `-0` | SIM | `roundToOneDecimal` e `normalizeNegativeZero`. |
 | `formatTemperature` no padrão `` `${valor} ${unit}` ``, com °C sem arredondar | SIM | Coberto por TU-03 a TU-05. |
 | `useTemperatureUnit` com `useState`, atualizador funcional e sem persistência | SIM | `setUnit(getNextTemperatureUnit)`; sem `useEffect` nem storage. |
@@ -49,7 +49,7 @@
 | `TemperatureHighlight` extraído, com `min-w-[7ch]` e botão em `flex-col` com a largura da caixa | SIM | Inclui a correção do BUG-01 do QA. |
 | `WeatherResult` com `temperatureUnit` e `onToggleTemperatureUnit`; umidade e vento inalterados | SIM | Contrato `WeatherResultProps` idêntico ao da TechSpec. |
 | Botão nativo em vez do `Button` do shadcn | SIM | Em `task-2` não há `components/ui/button.tsx`, então a decisão se mantém naturalmente. |
-| Funções puras em `lib/` | SIM, com ressalva | A justificativa original ("a pasta já existe no `template`") não se aplica a `task-2`. Ver P-01. |
+| Funções de conversão em `services/` | SIM | Decisão revista nesta revisão (P-01): `services/temperature.ts` ao lado de `weather-service.ts`, sem pasta nova. TechSpec e tarefa 1.0 atualizadas. |
 | Endpoints/API | NÃO APLICÁVEL | Nenhum endpoint criado ou alterado. |
 | Modelos de dados `TemperatureUnit` e `UseTemperatureUnitResult` | SIM | Um tipo por arquivo em `types/`. |
 | Testes E2E com `@axe-core/playwright` `^4.14.0` | SIM | Instalada a versão 4.14.0. |
@@ -82,11 +82,11 @@ Ambiente da suíte E2E:
 ## Problemas encontrados
 | Severidade | Arquivo | Linha | Descrição | Sugestão |
 |------------|---------|-------|-----------|----------|
-| Baixa | `frontend/src/lib/temperature.ts` | 1 | P-01: a pasta `lib/` não consta em `.agents/rules/folder-structure.md`, e a justificativa da TechSpec ("a pasta já existe no `template`") não vale para `task-2`. As funções são puras e coesas, então o risco é só de padronização. | Decidir se `lib/` passa a constar na rule do frontend, para funções puras de domínio. Mudar a rule ou a TechSpec depende de decisão da pessoa usuária, por isso não foi alterado aqui. |
+| Baixa — CORRIGIDO | `frontend/src/services/temperature.ts` | 1 | P-01: as funções de conversão ficavam em `frontend/src/lib/`, pasta que não consta em `.agents/rules/folder-structure.md`. | Corrigido por decisão da pessoa usuária: `temperature.ts` e `temperature.test.ts` foram movidos para `services/`, que a rule prevê para transformação de respostas da API; os 4 imports foram ajustados e a pasta `lib/` deixou de existir. TechSpec, tarefa 1.0 e QA atualizados. Lint, typecheck, build, testes e E2E revalidados. |
 | Baixa — CORRIGIDO | `e2e/weather-panel.spec.ts` | 25 | P-02: a porta do backend estava fixa no teste (`127.0.0.1:3001/weather`), o que impedia rodar a suíte em outra porta quando a 3001 estava ocupada. Problema anterior a esta funcionalidade. | Corrigido: as portas passaram para `e2e/test-ports.ts`, configuráveis por `E2E_MOCK_PORT`, `E2E_BACKEND_PORT` e `E2E_FRONTEND_PORT` (padrões 3200, 3001 e 5100). A `playwright.config.ts` e o E2E-02 usam esse módulo, e o mock recebe `MOCK_METEO_PORT`. Validado com `E2E_BACKEND_PORT=3050 npm test`. |
 | Baixa — CORRIGIDO | `tasks/prd-conversao-celsius-fahrenheit/techspec.md` e `task_1.md` | — | P-03: os documentos ainda citam o `template` como local da implementação ("O painel de clima ainda não está implementado no `template`", "Novos (no `template`…)"). Em `task-2` o painel existe e a funcionalidade foi implementada aqui. | Corrigido: as referências apontam para `task-2`, para `frontend/vite.config.ts` (onde está a config do Vitest) e para as dependências `msw` e `user-event` adicionadas. A decisão sobre `lib/` agora aponta para P-01. |
 
-Nenhum problema bloqueador foi encontrado. P-02 e P-03 foram corrigidos e revalidados; P-01 aguarda decisão.
+Nenhum problema bloqueador foi encontrado. P-01, P-02 e P-03 foram corrigidos e revalidados.
 
 ## Pontos positivos
 - A regra de conversão está isolada em funções puras, com constantes nomeadas e testes cobrindo toda a tabela de referência, inclusive o `-0`.
@@ -97,9 +97,8 @@ Nenhum problema bloqueador foi encontrado. P-02 e P-03 foram corrigidos e revali
 - O backend e o contrato `WeatherResponse` ficaram intactos, como o PRD exige.
 
 ## Recomendações
-- Decidir sobre P-01, registrando `lib/` na rule de estrutura de pastas do frontend ou movendo as funções para uma pasta já prevista.
 - Validar manualmente com VoiceOver ou NVDA o anúncio do status dentro da seção `aria-live` (risco de regiões live aninhadas já listado na TechSpec).
 - Fazer o commit das alterações na branch `task-2`, incluindo `tasks/prd-conversao-celsius-fahrenheit/`.
 
 ## Conclusão
-A implementação em `task-2` atende à TechSpec e às duas tarefas, segue as rules do projeto e a skill `react`, e tem cobertura acima da meta. Frontend, backend e a suíte E2E passaram em todas as validações. Dos três pontos de baixa severidade, P-02 e P-03 foram corrigidos; P-01 é uma decisão de padronização que não bloqueia a entrega. Veredito: **APROVADO COM RESSALVAS**.
+A implementação em `task-2` atende à TechSpec e às duas tarefas, segue as rules do projeto e a skill `react`, e tem cobertura acima da meta. Frontend, backend e a suíte E2E passaram em todas as validações. Os três pontos de baixa severidade (P-01, P-02 e P-03) foram corrigidos e revalidados. Veredito: **APROVADO**.

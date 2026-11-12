@@ -53,7 +53,7 @@ Foram lidos o `AGENTS.md` e todas as rules em `.agents/rules/`: `code-standards.
 - **`folder-structure.md`:**
   - `types/temperature-unit.ts` num arquivo próprio.
   - Hook em `hooks/`, componentes em `components/` e composição em `views/`.
-  - Funções puras em `lib/`. A justificativa está em `techspec.md`, seção "Principais decisões".
+  - Funções puras de conversão em `services/`, pasta prevista para transformação de respostas da API. A justificativa está em `techspec.md`, seção "Principais decisões".
   - Testes ao lado do código.
 - **`tests.md`:**
   - Vitest e Testing Library.
@@ -86,7 +86,7 @@ Foram lidos o `AGENTS.md` e todas as rules em `.agents/rules/`: `code-standards.
 ## Subtarefas
 
 - [x] 1.1 Confirmar o pré-requisito: o painel de clima e a infraestrutura de testes existem em `task-2`. Carregar a skill `react`.
-- [x] 1.2 Criar `types/temperature-unit.ts` e `lib/temperature.ts` com `DEFAULT_TEMPERATURE_UNIT`, `convertCelsiusToFahrenheit`, `formatTemperature` e `getNextTemperatureUnit`, e escrever TU-01 a TU-06.
+- [x] 1.2 Criar `types/temperature-unit.ts` e `services/temperature.ts` com `DEFAULT_TEMPERATURE_UNIT`, `convertCelsiusToFahrenheit`, `formatTemperature` e `getNextTemperatureUnit`, e escrever TU-01 a TU-06.
 - [x] 1.3 Criar `hooks/useTemperatureUnit.ts`, que começa em °C, alterna com atualizador funcional e não persiste nada, e escrever TU-07 a TU-09.
 - [x] 1.4 Criar `components/TemperatureUnitToggle.tsx`. Ele tem o rótulo de ação, um sufixo `sr-only` no nome acessível, um `role="status"` visualmente oculto e o estilo secundário com pelo menos 44 px. Escrever TU-10 a TU-14.
 - [x] 1.5 Extrair `components/TemperatureHighlight.tsx` do `WeatherResult`, com largura mínima reservada para o valor e o botão abaixo da caixa. Fazer o `WeatherResult` aceitar `temperatureUnit` e `onToggleTemperatureUnit` e formatar a sensação térmica. Adaptar `WeatherResult.test.tsx` e escrever TU-15 a TU-20.
@@ -104,7 +104,7 @@ Consulte em [`techspec.md`](./techspec.md):
 - "Visão dos componentes" e o diagrama de dependências: arquivos novos e modificados e a direção dos imports, sem ciclos.
 - "Principais interfaces": assinaturas, constantes, regras de arredondamento e normalização de `-0`, rótulos, nome acessível, status, foco e classes Tailwind do botão e do destaque.
 - "Modelos de dados": os contratos `TemperatureUnit`, `UseTemperatureUnitResult`, `TemperatureUnitToggleProps`, `TemperatureHighlightProps` e `WeatherResultProps`, o mapeamento `WeatherResponse` → exibição e a tabela de referência da conversão.
-- "Principais decisões": estado no `WeatherView`, sem persistência, botão nativo em vez do `Button` do shadcn, extração do `TemperatureHighlight` e funções em `lib/`.
+- "Principais decisões": estado no `WeatherView`, sem persistência, botão nativo em vez do `Button` do shadcn, extração do `TemperatureHighlight` e funções de conversão em `services/`.
 - "Riscos conhecidos":
   - regiões live aninhadas;
   - testes acoplados a `previousElementSibling` e `nextElementSibling`;
@@ -174,7 +174,7 @@ Novos:
 
 - `frontend/src/types/temperature-unit.ts`
 - `frontend/src/types/use-temperature-unit-result.ts`: um tipo por arquivo, conforme `folder-structure.md`.
-- `frontend/src/lib/temperature.ts` e `frontend/src/lib/temperature.test.ts`
+- `frontend/src/services/temperature.ts` e `frontend/src/services/temperature.test.ts`
 - `frontend/src/hooks/useTemperatureUnit.ts` e `frontend/src/hooks/useTemperatureUnit.test.ts`
 - `frontend/src/components/TemperatureUnitToggle.tsx` e `frontend/src/components/TemperatureUnitToggle.test.tsx`
 - `frontend/src/components/TemperatureHighlight.tsx`

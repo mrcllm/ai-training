@@ -1,5 +1,5 @@
 import { CloudSun } from 'lucide-react';
-import { formatTemperature } from '../lib/temperature';
+import { formatTemperature } from '../services/temperature';
 import type { TemperatureUnit } from '../types/temperature-unit';
 import { TemperatureUnitToggle } from './TemperatureUnitToggle';
 

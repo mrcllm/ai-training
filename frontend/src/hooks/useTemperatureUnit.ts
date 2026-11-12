@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DEFAULT_TEMPERATURE_UNIT, getNextTemperatureUnit } from '../lib/temperature';
+import { DEFAULT_TEMPERATURE_UNIT, getNextTemperatureUnit } from '../services/temperature';
 import type { TemperatureUnit } from '../types/temperature-unit';
 import type { UseTemperatureUnitResult } from '../types/use-temperature-unit-result';
 

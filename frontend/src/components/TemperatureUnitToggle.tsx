@@ -1,4 +1,4 @@
-import { getNextTemperatureUnit } from '../lib/temperature';
+import { getNextTemperatureUnit } from '../services/temperature';
 import type { TemperatureUnit } from '../types/temperature-unit';
 
 type TemperatureUnitToggleProps = { unit: TemperatureUnit; onToggle: () => void };

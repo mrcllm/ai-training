@@ -59,7 +59,7 @@ A suíte completa terminou com 15 testes passando e 1 pulado (`evidences/e2e-sui
 
 | Camada | ID | Resultado | Validação/comando | Observações |
 |--------|----|-----------|-------------------|------------|
-| Unidade | TU-01 a TU-06 (`lib/temperature`) | PASSOU | `npm run test` em `frontend/` | O TU-01 roda os 6 valores da tabela. TU-02 e TU-09 foram validados com mutação: falham quando a regra quebra. |
+| Unidade | TU-01 a TU-06 (`services/temperature`) | PASSOU | `npm run test` em `frontend/` | O TU-01 roda os 6 valores da tabela. TU-02 e TU-09 foram validados com mutação: falham quando a regra quebra. |
 | Unidade | TU-07 a TU-09 (`useTemperatureUnit`) | PASSOU | `npm run test` | |
 | Unidade | TU-10 a TU-14 (`TemperatureUnitToggle`) | PASSOU | `npm run test` | |
 | Unidade | TU-15 a TU-20 (`WeatherResult`) | PASSOU | `npm run test` | O teste original do cartão continua passando. |

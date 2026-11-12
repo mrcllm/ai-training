@@ -6,7 +6,7 @@ A conversão entre °C e °F é implementada somente no frontend, como uma camad
 
 A solução tem quatro peças:
 
-- funções puras de conversão e formatação em `lib/temperature.ts`;
+- funções puras de conversão e formatação em `services/temperature.ts`;
 - um hook `useTemperatureUnit` que guarda a unidade ativa em estado React, mantido no `WeatherView`;
 - um botão `TemperatureUnitToggle` com rótulo de ação e anúncio de status;
 - a extração de `TemperatureHighlight` a partir do `WeatherResult`.
@@ -22,7 +22,7 @@ A funcionalidade é implementada em `task-2`, sobre o painel de clima já existe
 | Componente | Tipo | Situação | Responsabilidade |
 | --- | --- | --- | --- |
 | `types/temperature-unit.ts` | Tipo | Novo | Define `TemperatureUnit` (`'°C' \| '°F'`). |
-| `lib/temperature.ts` | Funções puras | Novo | Converte °C → °F com arredondamento e normalização de `-0`, formata o texto exibido e calcula a próxima unidade. |
+| `services/temperature.ts` | Funções puras | Novo | Converte °C → °F com arredondamento e normalização de `-0`, formata o texto exibido e calcula a próxima unidade. |
 | `hooks/useTemperatureUnit.ts` | Hook | Novo | Guarda a unidade ativa (padrão °C) e expõe `toggleUnit`. |
 | `components/TemperatureUnitToggle.tsx` | Componente | Novo | Botão "Mostrar em °F/°C" e região de status visualmente oculta que anuncia a unidade em uso. |
 | `components/TemperatureHighlight.tsx` | Componente | Novo (extraído) | Destaque da temperatura atual (caixa amarela, ícone e rótulo "Temperatura atual") com o botão de alternância logo abaixo. |
@@ -36,11 +36,11 @@ Relacionamentos e dependências (unidirecionais, sem ciclos):
 ```text
 WeatherView ──► useWeatherSearch            (existente, inalterado)
      │
-     ├────────► useTemperatureUnit ──► lib/temperature ──► types/temperature-unit
+     ├────────► useTemperatureUnit ──► services/temperature ──► types/temperature-unit
      │
      └────────► WeatherResult ──► TemperatureHighlight ──► TemperatureUnitToggle
                       │                    │
-                      └────────────────────┴──► lib/temperature (formatTemperature)
+                      └────────────────────┴──► services/temperature (formatTemperature)
 ```
 
 Fluxo de dados:
@@ -64,7 +64,7 @@ export function formatTemperature(celsius: number, unit: TemperatureUnit): strin
 export function getNextTemperatureUnit(unit: TemperatureUnit): TemperatureUnit;
 ```
 
-Regras de `lib/temperature.ts`:
+Regras de `services/temperature.ts`:
 
 - `convertCelsiusToFahrenheit` aplica `celsius × 9/5 + 32`, arredonda para uma casa decimal (`Math.round(valor × 10) / 10`) e normaliza `-0` para `0` (RF6 e RF7).
 - As constantes têm nomes próprios: `FAHRENHEIT_SCALE_FACTOR = 9 / 5`, `FAHRENHEIT_OFFSET = 32` e `ONE_DECIMAL_FACTOR = 10`.
@@ -264,7 +264,7 @@ Estratégia:
 
 - Os componentes são testados isoladamente com Testing Library e `@testing-library/user-event`, por papel e nome acessível.
 - As asserções sobre valores usam o rótulo vizinho ("Temperatura atual", "Sensação térmica"), como os testes atuais. Se `TemperatureHighlight` mudar a estrutura, as consultas devem seguir o rótulo e não a posição exata no DOM.
-- Não há mocks em `lib/temperature.ts` nem no hook, porque são puros. Os componentes recebem spies (`vi.fn()`) apenas para os handlers.
+- Não há mocks em `services/temperature.ts` nem no hook, porque são puros. Os componentes recebem spies (`vi.fn()`) apenas para os handlers.
 
 ### Testes de integração (se aplicável)
 
@@ -310,7 +310,7 @@ Ambiente E2E:
 ### Ordem de construção
 
 1. **Pré-requisito:** o painel de clima implementado em `task-2`, com Vitest, jsdom, Testing Library, limites de cobertura de 80% em `frontend/vite.config.ts` e Playwright em `e2e/`. Adicionar `msw` e `@testing-library/user-event` ao frontend com `npm install --save-dev`.
-2. **`types/temperature-unit.ts` e `lib/temperature.ts`, com TU-01 a TU-06.** A regra de conversão é o maior risco e não depende de nada mais.
+2. **`types/temperature-unit.ts` e `services/temperature.ts`, com TU-01 a TU-06.** A regra de conversão é o maior risco e não depende de nada mais.
 3. **`hooks/useTemperatureUnit.ts`, com TU-07 a TU-09.** Depende do passo 2.
 4. **`components/TemperatureUnitToggle.tsx`, com TU-10 a TU-14.** Depende do tipo.
 5. **`components/TemperatureHighlight.tsx` (extração) e mudanças no `WeatherResult`, com TU-15 a TU-20.** Inclui adaptar o `WeatherResult.test.tsx` existente às novas props.
@@ -350,7 +350,7 @@ Não aplicável. A funcionalidade é puramente de apresentação no navegador, n
   - O anúncio fica numa região `role="status"` dedicada, e o nome acessível contém o texto visível (WCAG 2.5.3).
 - **Botão nativo em vez do `Button` do shadcn (`components/ui/button.tsx`).** Os controles do painel de referência usam botões nativos com a paleta do painel. O `Button` do shadcn usa tokens zinc e repassa props com spread, o que contraria a regra de props explícitas da skill `react`.
 - **Extração do `TemperatureHighlight`.** O `WeatherResult` já tem cerca de 25 linhas de JSX. Incluir o botão ultrapassaria o limite de 30 linhas por componente.
-- **Funções puras em `lib/`.** `services/` é reservada ao acesso ao backend pela rule de estrutura de pastas, então as funções de conversão ficam em `frontend/src/lib/`. Em `task-2` essa pasta é nova e ainda não consta em `folder-structure.md`; a decisão sobre registrá-la na rule está pendente (P-01 em `codereview.md`).
+- **Funções de conversão em `services/`.** A rule de estrutura de pastas prevê `services/` para "acesso ao backend, incluindo clientes HTTP, chamadas de endpoints e transformação de respostas da API". Converter e formatar a temperatura recebida do backend é uma transformação dessa resposta, por isso `temperature.ts` fica ao lado de `weather-service.ts`. Criar uma pasta nova (`lib/` ou `utils/`) foi descartado, porque não consta em `folder-structure.md` (P-01 em `codereview.md`).
 
 ### Riscos conhecidos
 
@@ -414,7 +414,7 @@ Novos (em `task-2`):
 
 - `frontend/src/types/temperature-unit.ts`
 - `frontend/src/types/use-temperature-unit-result.ts`: um tipo por arquivo, conforme `folder-structure.md`.
-- `frontend/src/lib/temperature.ts` e `frontend/src/lib/temperature.test.ts`
+- `frontend/src/services/temperature.ts` e `frontend/src/services/temperature.test.ts`
 - `frontend/src/hooks/useTemperatureUnit.ts` e `frontend/src/hooks/useTemperatureUnit.test.ts`
 - `frontend/src/components/TemperatureUnitToggle.tsx` e `frontend/src/components/TemperatureUnitToggle.test.tsx`
 - `frontend/src/components/TemperatureHighlight.tsx`
