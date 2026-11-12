@@ -21,25 +21,22 @@ describe('fetchWeather', () => {
     expect(options.signal).toBe(signal);
   });
 
-  it('maps a city validation response to a useful message', async () => {
+  it('TU-17 fetchWeather converte INVALID_CITY no kind validation sem texto', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: false,
       json: async () => ({ error: { code: 'INVALID_CITY' } }),
     }));
 
-    await expect(fetchWeather(' ', signal)).rejects.toMatchObject({
-      kind: 'validation',
-      message: 'Informe uma cidade com pelo menos 2 caracteres.',
-    });
+    await expect(fetchWeather(' ', signal)).rejects.toEqual({ kind: 'validation' });
   });
 
-  it('maps an unknown city response to a useful message', async () => {
+  it('TU-17 fetchWeather converte CITY_NOT_FOUND no kind not-found sem texto', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: false,
       json: async () => ({ error: { code: 'CITY_NOT_FOUND' } }),
     }));
 
-    await expect(fetchWeather('Atlantis', signal)).rejects.toMatchObject({ kind: 'not-found' });
+    await expect(fetchWeather('Atlantis', signal)).rejects.toEqual({ kind: 'not-found' });
   });
 
   it('uses a generic error for unrecognized API responses', async () => {

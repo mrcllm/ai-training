@@ -23,30 +23,30 @@ describe('useWeatherSearch', () => {
   });
 
   it('keeps a structured weather error from the service', async () => {
-    mockedFetchWeather.mockRejectedValue({ kind: 'not-found', message: 'Cidade não encontrada.' });
+    mockedFetchWeather.mockRejectedValue({ kind: 'not-found' });
     const { result } = renderHook(() => useWeatherSearch());
 
     await act(async () => result.current.search('Atlantis'));
 
-    expect(result.current.state).toEqual({
-      status: 'error',
-      error: { kind: 'not-found', message: 'Cidade não encontrada.' },
-    });
+    expect(result.current.state).toEqual({ status: 'error', error: { kind: 'not-found' } });
   });
 
-  it('uses the fallback message for an unexpected service error', async () => {
+  it('TU-18 useWeatherSearch usa o kind unavailable para erros inesperados', async () => {
     mockedFetchWeather.mockRejectedValue(new Error('unexpected'));
     const { result } = renderHook(() => useWeatherSearch());
 
     await act(async () => result.current.search('Lisboa'));
 
-    expect(result.current.state).toEqual({
-      status: 'error',
-      error: {
-        kind: 'unavailable',
-        message: 'Não foi possível consultar o clima agora. Tente novamente em instantes.',
-      },
-    });
+    expect(result.current.state).toEqual({ status: 'error', error: { kind: 'unavailable' } });
+  });
+
+  it('TU-18 useWeatherSearch trata como unavailable um erro com kind desconhecido', async () => {
+    mockedFetchWeather.mockRejectedValue({ kind: 'unexpected-kind' });
+    const { result } = renderHook(() => useWeatherSearch());
+
+    await act(async () => result.current.search('Lisboa'));
+
+    expect(result.current.state).toEqual({ status: 'error', error: { kind: 'unavailable' } });
   });
 
   it('ignores a second search while the first search is active', async () => {

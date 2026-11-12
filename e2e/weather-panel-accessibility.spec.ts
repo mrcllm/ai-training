@@ -3,6 +3,10 @@ import { expect, test } from '@playwright/test';
 test('E2E-06 permite concluir a busca e acessar a fonte pelo teclado', async ({ page }) => {
   await page.goto('/');
   await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'PT Português (Brasil)' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'EN English' })).toBeFocused();
+  await page.keyboard.press('Tab');
   await expect(page.getByRole('textbox', { name: 'Cidade' })).toBeFocused();
   await page.keyboard.type('Paris');
   await page.keyboard.press('Tab');

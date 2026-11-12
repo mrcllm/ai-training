@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { WeatherResult } from './WeatherResult';
+import { renderWithLanguage } from '../test/render-with-language';
 import { weatherResponse } from '../test/weather-fixtures';
 import type { TemperatureUnit } from '../types/temperature-unit';
 
@@ -58,5 +59,30 @@ describe('WeatherResult', () => {
     renderResult('°C', onToggleTemperatureUnit);
     await user.click(screen.getByRole('button', { name: /^Mostrar em °F/ }));
     expect(onToggleTemperatureUnit).toHaveBeenCalledTimes(1);
+  });
+
+  it('TU-16 WeatherResult em inglês traduz rótulos e condição sem alterar valores, unidades e localidade', () => {
+    renderWithLanguage(<WeatherResult weather={weatherResponse} temperatureUnit="°C" onToggleTemperatureUnit={vi.fn()} />, 'en');
+
+    expect(screen.getByText('Partly cloudy')).toBeVisible();
+    expect(screen.getByText('Location found')).toBeVisible();
+    expect(screen.getByText('Current temperature')).toBeVisible();
+    expect(screen.getByText('Feels like')).toBeVisible();
+    expect(screen.getByText('Relative humidity')).toBeVisible();
+    expect(screen.getByText('Wind speed')).toBeVisible();
+    expect(screen.getByText(/Data by/)).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Lisboa, Lisboa, Portugal' })).toBeVisible();
+    expect(screen.getByText('18.4 °C')).toBeVisible();
+    expect(screen.getByText('17.9 °C')).toBeVisible();
+    expect(screen.getByText('72 %')).toBeVisible();
+    expect(screen.getByText('14.2 km/h')).toBeVisible();
+  });
+
+  it('em inglês traduz o botão de alternância e o status da unidade', () => {
+    renderWithLanguage(<WeatherResult weather={weatherResponse} temperatureUnit="°F" onToggleTemperatureUnit={vi.fn()} />, 'en');
+
+    expect(screen.getByRole('button')).toHaveAccessibleName('Show in °C (Celsius)');
+    expect(screen.getByRole('status')).toHaveTextContent('Temperatures shown in Fahrenheit');
+    expect(screen.getByText('Current temperature').previousElementSibling).toHaveTextContent('65.1 °F');
   });
 });

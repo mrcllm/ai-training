@@ -1,5 +1,8 @@
+import { LanguageProvider } from './i18n/LanguageProvider';
 import { WeatherView } from './views/WeatherView';
 
 export default function App() {
-  return <WeatherView />;
+  return <LanguageProvider>
+    <WeatherView />
+  </LanguageProvider>;
 }

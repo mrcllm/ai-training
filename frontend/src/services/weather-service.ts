@@ -2,11 +2,11 @@ import type { ApiErrorCode, UiWeatherError } from '../types/api-error';
 import type { WeatherResponse } from '../types/weather-response';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3001';
-const ERROR_MESSAGES: Record<ApiErrorCode, UiWeatherError> = {
-  INVALID_CITY: { kind: 'validation', message: 'Informe uma cidade com pelo menos 2 caracteres.' },
-  CITY_NOT_FOUND: { kind: 'not-found', message: 'Cidade não encontrada. Revise o nome e tente novamente.' },
-  WEATHER_PROVIDER_UNAVAILABLE: { kind: 'unavailable', message: 'Não foi possível consultar o clima agora. Tente novamente em instantes.' },
-  INTERNAL_ERROR: { kind: 'unavailable', message: 'Não foi possível consultar o clima agora. Tente novamente em instantes.' },
+const ERROR_KINDS: Record<ApiErrorCode, UiWeatherError> = {
+  INVALID_CITY: { kind: 'validation' },
+  CITY_NOT_FOUND: { kind: 'not-found' },
+  WEATHER_PROVIDER_UNAVAILABLE: { kind: 'unavailable' },
+  INTERNAL_ERROR: { kind: 'unavailable' },
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -46,7 +46,7 @@ function isWeatherMetadata(units: unknown, source: unknown): boolean {
 function getApiErrorCode(value: unknown): ApiErrorCode | undefined {
   if (!isRecord(value) || !isRecord(value.error)) return undefined;
   const code = value.error.code;
-  return typeof code === 'string' && Object.prototype.hasOwnProperty.call(ERROR_MESSAGES, code)
+  return typeof code === 'string' && Object.prototype.hasOwnProperty.call(ERROR_KINDS, code)
     ? code as ApiErrorCode : undefined;
 }
 
@@ -55,7 +55,7 @@ export async function fetchWeather(city: string, signal: AbortSignal): Promise<W
   endpoint.searchParams.set('city', city);
   const response = await fetch(endpoint, { signal });
   const payload: unknown = await response.json().catch(() => undefined);
-  if (!response.ok) throw ERROR_MESSAGES[getApiErrorCode(payload) ?? 'WEATHER_PROVIDER_UNAVAILABLE'];
-  if (!isWeatherResponse(payload)) throw ERROR_MESSAGES.WEATHER_PROVIDER_UNAVAILABLE;
+  if (!response.ok) throw ERROR_KINDS[getApiErrorCode(payload) ?? 'WEATHER_PROVIDER_UNAVAILABLE'];
+  if (!isWeatherResponse(payload)) throw ERROR_KINDS.WEATHER_PROVIDER_UNAVAILABLE;
   return payload;
 }
